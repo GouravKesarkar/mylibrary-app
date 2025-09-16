@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyLibrary - Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-container">
+    <h2>📚 MyLibrary Login</h2>
+    <input type="email" id="email" placeholder="Enter Email" required>
+    <input type="password" id="password" placeholder="Enter Password" required>
+    <button id="loginBtn">Login</button>
+    <p id="error-msg"></p>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    // ✅ Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // ✅ Your Firebase Config (replace with your own from Firebase Console)
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
+      authDomain: "mylibrary-app-5c57e.firebaseapp.com",
+      projectId: "mylibrary-app-5c57e",
+      storageBucket: "mylibrary-app-5c57e.firebasestorage.app",
+      messagingSenderId: "1017511803180",
+      appId: "1:1017511803180:web:5ccf3062e338c7a6985489"
+    };
+
+    // ✅ Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ✅ Login Button
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const errorMsg = document.getElementById("error-msg");
+
+      try {
+        // Authenticate
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Fetch Role from Firestore
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const role = userDoc.data().role;
+
+          // Save role to localStorage
+          localStorage.setItem("userRole", role);
+          localStorage.setItem("userEmail", email);
+
+          // Redirect
+          window.location.href = "home.html";
+        } else {
+          errorMsg.textContent = "⚠️ User role not found. Contact Admin.";
+        }
+      } catch (error) {
+        errorMsg.textContent = "❌ " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
