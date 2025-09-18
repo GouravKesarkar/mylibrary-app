@@ -90,7 +90,7 @@
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const role = userDoc.data().role;
-        welcomeMsg.textContent = `👋 Hello, ${user.email} (${role})`;
+        welcomeMsg.textContent = `👋 Hello, ${user.email}`;
 
         if (role === "customer") {
           myBooksBtn.style.display = "block";
