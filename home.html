@@ -92,10 +92,10 @@
         const role = userDoc.data().role;
         welcomeMsg.textContent = `👋 Hello, ${user.email} (${role})`;
 
-        if (role === "Customer") {
+        if (role === "customer") {
           myBooksBtn.style.display = "block";
         }
-        if (role === "Admin") {
+        if (role === "admin") {
           manageBtn.style.display = "block";
         }
       } else {
