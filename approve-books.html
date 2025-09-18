@@ -55,24 +55,36 @@
 
     let searchQuery = "";
 
+    
+
     async function loadRequests() {
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "⏳ Loading...";
 
-      let q = query(
+      try {
+        let q = query(
         collection(db, "bookings"),
         where("status", "==", "booked"),
         orderBy("bookedAt"),
         limit(20)
-      );
+        );
 
-      const snapshot = await getDocs(q);
-      booksList.innerHTML = "";
+        const snapshot = await getDocs(q);
+        booksList.innerHTML = "";
 
-      if (snapshot.empty) {
-        booksList.innerHTML = "<p>No pending requests ✅</p>";
+        if (snapshot.empty) {
+        booksList.innerHTML = "<p>No requests found ❌</p>";
         return;
-      }
+        }
+
+        snapshot.forEach(docSnap => {
+        console.log("📖 Booking:", docSnap.data()); // ✅ debug log
+        });
+
+        } catch (err) {
+        console.error("🔥 Firestore error:", err);
+        booksList.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+        }
 
       for (const docSnap of snapshot.docs) {
         const booking = docSnap.data();
