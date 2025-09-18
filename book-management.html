@@ -3,31 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📚 Book Management</title>
+  <title>Book Management</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- PWA support -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0077ff">
-</head>
-<body>
-  <div class="container">
-    <h2>📚 Book Management</h2>
-
-    <div class="menu">
-      <button class="menu-btn" onclick="location.href='approve.html'">✅ Approve / Reject Books</button>
-      <button class="menu-btn" onclick="location.href='books-with-users.html'">👥 Books with Users</button>
-      <button class="menu-btn" onclick="location.href='add-delete.html'">➕ Add / Delete Books</button>
-    </div>
-
-    <button onclick="location.href='home.html'" class="back-btn">⬅️ Back to Home</button>
-  </div>
-
-  <!-- Register Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
-        .then(() => console.log("✅ Service Worker registered"))
-        .catch(err => console.log("❌ SW registration failed", err));
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js")
+          .then(() => console.log("✅ Service Worker registered"))
+          .catch(err => console.log("❌ SW registration failed", err));
+      });
     }
   </script>
+</head>
+<body>
+  <header>
+    <h2>📚 Book Management</h2>
+    <button onclick="window.location.href='home.html'">⬅ Back</button>
+  </header>
+
+  <div class="home-container">
+    <h2>Manage Library</h2>
+    <p>Select an option below:</p>
+
+    <button class="section-btn" onclick="window.location.href='approve-books.html'">
+      ✅ Approve / Reject Books
+    </button>
+
+    <button class="section-btn" onclick="window.location.href='books-with-users.html'">
+      📖 Books with Users
+    </button>
+
+    <button class="section-btn" onclick="window.location.href='add-delete-books.html'">
+      ➕ Add / Delete Books
+    </button>
+  </div>
 </body>
 </html>
