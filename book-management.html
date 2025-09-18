@@ -86,7 +86,7 @@
 
       // Only allow Admin
       const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists() || userDoc.data().role !== "Admin") {
+      if (!userDoc.exists() || userDoc.data().role !== "admin") {
         alert("❌ Access denied. Admin only.");
         window.location.href = "home.html";
         return;
