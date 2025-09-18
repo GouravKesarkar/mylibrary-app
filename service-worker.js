@@ -8,7 +8,7 @@ const ASSETS = [
   "/book-management.html",
   "/style.css",
   "/manifest.json",
-  "/icons/mylibrary-icon-192.png"
+  "/icon/mylibrary-icon-192.png"
 ];
 
 // Install event - cache assets
