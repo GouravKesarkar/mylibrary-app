@@ -5,7 +5,7 @@ const ASSETS = [
   "/home.html",
   "/books.html",
   "/mybooks.html",
-  "/management.html",
+  "/book-management.html",
   "/style.css",
   "/manifest.json",
   "/icons/icon-192.png",
