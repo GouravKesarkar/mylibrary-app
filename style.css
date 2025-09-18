@@ -1,51 +1,211 @@
+/* 🌐 Global Styles */
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: #f0f4f8;
-  }
-  
-  .login-container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-    width: 300px;
-    text-align: center;
-  }
-  
-  .login-container h2 {
-    margin-bottom: 20px;
-    color: #333;
-  }
-  
-  .login-container input {
-    width: 90%;
-    padding: 10px;
-    margin: 8px 0;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-  }
-  
-  .login-container button {
-    width: 100%;
-    padding: 10px;
-    background: #0077ff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-  
-  .login-container button:hover {
-    background: #005fcc;
-  }
-  
-  #error-msg {
-    color: red;
-    margin-top: 10px;
-    font-size: 14px;
-  }
-  
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f4f6f9;
+  color: #333;
+}
+
+/* ✅ Login Page */
+.login-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+  width: 300px;
+  text-align: center;
+  margin: 100px auto; /* instead of flex full height */
+}
+
+.login-container h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.login-container input {
+  width: 90%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.login-container button {
+  width: 100%;
+  padding: 10px;
+  background: #0077ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.login-container button:hover {
+  background: #005fcc;
+}
+
+#error-msg {
+  color: red;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* ✅ Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0077ff;
+  color: #fff;
+  padding: 12px 20px;
+}
+header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+header button {
+  background: #fff;
+  color: #0077ff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* ✅ Search */
+.search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;   /* fixes alignment */
+  margin: 20px;
+  gap: 10px;
+}
+.search-container input {
+  flex: 1;
+  min-width: 200px;
+  max-width: 400px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.search-container button {
+  padding: 8px 14px;
+  border: none;
+  background: #0077ff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ✅ Book Cards */
+#booksList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+.book-card {
+  width: 200px;
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+  margin: auto;
+}
+.book-card:hover {
+  transform: scale(1.03);
+}
+.book-img {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+.book-card h3 {
+  font-size: 16px;
+  margin: 6px 0;
+}
+.book-card p {
+  font-size: 14px;
+  margin: 4px 0;
+  color: #555;
+}
+.book-card button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  background: #0077ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.book-card button:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+
+/* ✅ Pagination */
+#pagination {
+  text-align: center;
+  margin: 20px;
+}
+#pagination button {
+  margin: 5px;
+  padding: 8px 12px;
+  border: none;
+  background: #0077ff;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ✅ Home Page */
+.home-container {
+  max-width: 600px;
+  margin: 40px auto;
+  text-align: center;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+}
+
+.home-container h2 {
+  margin-bottom: 10px;
+  color: #0077ff;
+}
+
+.section-btn {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  margin: 12px 0;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #0077ff;
+  color: white;
+  transition: background 0.3s;
+}
+
+.section-btn:hover {
+  background: #005fcc;
+}
+
+.logout-btn {
+  margin-top: 20px;
+  background: #ff4444;
+}
+
+.logout-btn:hover {
+  background: #cc0000;
+}
