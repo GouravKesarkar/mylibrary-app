@@ -48,38 +48,4 @@ body {
     margin-top: 10px;
     font-size: 14px;
   }
-
-  .menu {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin: 20px 0;
-  }
-  
-  .menu-btn {
-    padding: 15px;
-    font-size: 18px;
-    border: none;
-    border-radius: 10px;
-    background: #0077ff;
-    color: white;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  
-  .menu-btn:hover {
-    background: #005fcc;
-  }
-  
-  .back-btn {
-    margin-top: 20px;
-    padding: 10px 15px;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    background: gray;
-    color: white;
-    cursor: pointer;
-  }
-  
   
