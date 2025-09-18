@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Approve Book Requests</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- PWA support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0077ff">
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js")
+          .then(() => console.log("✅ Service Worker registered"))
+          .catch(err => console.log("❌ SW registration failed", err));
+      });
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <h2>✅ Approve Book Requests</h2>
+    <button onclick="window.location.href='book-management.html'">⬅ Back</button>
+  </header>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search by user or book...">
+    <button id="searchBtn">Search</button>
+  </div>
+
+  <div id="booksList"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { 
+      getFirestore, collection, query, where, orderBy, limit,
+      getDocs, getDoc, doc, updateDoc 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
+      authDomain: "mylibrary-app-5c57e.firebaseapp.com",
+      projectId: "mylibrary-app-5c57e",
+      storageBucket: "mylibrary-app-5c57e.firebasestorage.app",
+      messagingSenderId: "1017511803180",
+      appId: "1:1017511803180:web:5ccf3062e338c7a6985489"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore(app);
+
+    let searchQuery = "";
+
+    async function loadRequests() {
+      const booksList = document.getElementById("booksList");
+      booksList.innerHTML = "⏳ Loading...";
+
+      let q = query(
+        collection(db, "bookings"),
+        where("status", "==", "pending"),
+        orderBy("bookedAt"),
+        limit(20)
+      );
+
+      const snapshot = await getDocs(q);
+      booksList.innerHTML = "";
+
+      if (snapshot.empty) {
+        booksList.innerHTML = "<p>No pending requests ✅</p>";
+        return;
+      }
+
+      for (const docSnap of snapshot.docs) {
+        const booking = docSnap.data();
+        const bookingId = docSnap.id;
+
+        // fetch book details
+        const bookRef = doc(db, "books", booking.bookId);
+        const bookSnap = await getDoc(bookRef);
+        const book = bookSnap.exists() ? bookSnap.data() : { name: "Unknown Book" };
+
+        // fetch user details
+        const userRef = doc(db, "users", booking.userId);
+        const userSnap = await getDoc(userRef);
+        const user = userSnap.exists() ? userSnap.data() : { username: "Unknown User" };
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+        card.innerHTML = `
+          <img src="${book.picture || 'default-book.png'}" class="book-img" alt="Book">
+          <h3>${book.name}</h3>
+          <p>👤 Requested by: ${user.username}</p>
+          <p>Status: ⏳ Pending</p>
+          <button onclick="approveRequest('${bookingId}')">Approve</button>
+          <button style="background:#ff4444;" onclick="rejectRequest('${bookingId}')">Reject</button>
+        `;
+        booksList.appendChild(card);
+      }
+    }
+
+    window.approveRequest = async function(bookingId) {
+      await updateDoc(doc(db, "bookings", bookingId), { status: "approved" });
+      alert("✅ Request approved!");
+      loadRequests();
+    }
+
+    window.rejectRequest = async function(bookingId) {
+      await updateDoc(doc(db, "bookings", bookingId), { status: "rejected" });
+      alert("❌ Request rejected!");
+      loadRequests();
+    }
+
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      searchQuery = document.getElementById("searchInput").value.trim();
+      loadRequests();
+    });
+
+    loadRequests();
+  </script>
+</body>
+</html>
