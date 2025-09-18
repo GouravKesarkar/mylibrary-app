@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MyLibrary - Login</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0077ff">
 </head>
 <body>
   <div class="login-container">
@@ -19,12 +23,12 @@
   <script type="module">
     // ✅ Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } 
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } 
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } 
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // ✅ Your Firebase Config (replace with your own from Firebase Console)
+    // ✅ Your Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
       authDomain: "mylibrary-app-5c57e.firebaseapp.com",
@@ -39,9 +43,21 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // ✅ Redirect if already logged in
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          localStorage.setItem("userRole", userDoc.data().role);
+          localStorage.setItem("userEmail", user.email);
+          window.location.href = "home.html";
+        }
+      }
+    });
+
     // ✅ Login Button
     document.getElementById("loginBtn").addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
+      const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
       const errorMsg = document.getElementById("error-msg");
 
@@ -68,6 +84,15 @@
         errorMsg.textContent = "❌ " + error.message;
       }
     });
+  </script>
+
+  <!-- ✅ Service Worker Registration -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("✅ Service Worker registered"))
+        .catch(err => console.log("❌ SW registration failed", err));
+    }
   </script>
 </body>
 </html>

@@ -3,28 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MyLibrary - Login</title>
+  <title>MyLibrary - Home</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0077ff">
+
+  <style>
+    .home-container {
+      max-width: 600px;
+      margin: 40px auto;
+      text-align: center;
+    }
+    .section-btn {
+      display: block;
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #0077ff;
+      color: white;
+      transition: background 0.3s;
+    }
+    .section-btn:hover {
+      background: #005fcc;
+    }
+    .logout-btn {
+      margin-top: 20px;
+      background: #ff4444;
+    }
+  </style>
 </head>
 <body>
-  <div class="login-container">
-    <h2>📚 MyLibrary Login</h2>
-    <input type="email" id="email" placeholder="Enter Email" required>
-    <input type="password" id="password" placeholder="Enter Password" required>
-    <button id="loginBtn">Login</button>
-    <p id="error-msg"></p>
+  <div class="home-container">
+    <h2>📚 Welcome to MyLibrary</h2>
+    <p id="welcomeMsg"></p>
+
+    <button id="libraryBtn" class="section-btn">📖 Library Books</button>
+    <button id="myBooksBtn" class="section-btn" style="display:none;">📚 Books with Me</button>
+    <button id="manageBtn" class="section-btn" style="display:none;">⚙️ Book Management</button>
+
+    <button id="logoutBtn" class="section-btn logout-btn">🚪 Logout</button>
   </div>
 
-  <!-- Firebase Scripts -->
+  <!-- Firebase -->
   <script type="module">
-    // ✅ Import Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } 
+    import { getAuth, signOut, onAuthStateChanged } 
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } 
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // ✅ Your Firebase Config (replace with your own from Firebase Console)
+    // ✅ Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
       authDomain: "mylibrary-app-5c57e.firebaseapp.com",
@@ -39,35 +73,62 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // ✅ Login Button
-    document.getElementById("loginBtn").addEventListener("click", async () => {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const errorMsg = document.getElementById("error-msg");
+    // UI elements
+    const welcomeMsg = document.getElementById("welcomeMsg");
+    const myBooksBtn = document.getElementById("myBooksBtn");
+    const manageBtn = document.getElementById("manageBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
 
-      try {
-        // Authenticate
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+    // ✅ Auth check
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "index.html"; // Not logged in
+        return;
+      }
 
-        // Fetch Role from Firestore
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const role = userDoc.data().role;
+      // Fetch role from Firestore
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const role = userDoc.data().role;
+        welcomeMsg.textContent = `👋 Hello, ${user.email} (${role})`;
 
-          // Save role to localStorage
-          localStorage.setItem("userRole", role);
-          localStorage.setItem("userEmail", email);
-
-          // Redirect
-          window.location.href = "home.html";
-        } else {
-          errorMsg.textContent = "⚠️ User role not found. Contact Admin.";
+        if (role === "Customer") {
+          myBooksBtn.style.display = "block";
         }
-      } catch (error) {
-        errorMsg.textContent = "❌ " + error.message;
+        if (role === "Admin") {
+          manageBtn.style.display = "block";
+        }
+      } else {
+        welcomeMsg.textContent = "⚠️ Role not found. Contact Admin.";
       }
     });
+
+    // ✅ Navigation
+    document.getElementById("libraryBtn").addEventListener("click", () => {
+      window.location.href = "books.html";
+    });
+    myBooksBtn.addEventListener("click", () => {
+      window.location.href = "mybooks.html";
+    });
+    manageBtn.addEventListener("click", () => {
+      window.location.href = "management.html";
+    });
+
+    // ✅ Logout
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      localStorage.clear();
+      window.location.href = "index.html";
+    });
+  </script>
+
+  <!-- Service Worker -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("✅ Service Worker registered"))
+        .catch(err => console.log("❌ SW registration failed", err));
+    }
   </script>
 </body>
 </html>
