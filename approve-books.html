@@ -61,7 +61,7 @@
 
       let q = query(
         collection(db, "bookings"),
-        where("status", "==", "pending"),
+        where("status", "==", "booked"),
         orderBy("bookedAt"),
         limit(20)
       );
