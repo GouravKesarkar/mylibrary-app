@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Books</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0077ff">
+</head>
+<body>
+  <h2>📚 Library Books</h2>
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search by book name or author...">
+    <button id="searchBtn">Search</button>
+  </div>
+
+  <!-- Books List -->
+  <div id="booksList"></div>
+
+  <!-- Pagination -->
+  <div id="pagination"></div>
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, query, where, limit, getDocs, orderBy, startAfter } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
+      authDomain: "mylibrary-app-5c57e.firebaseapp.com",
+      projectId: "mylibrary-app-5c57e",
+      storageBucket: "mylibrary-app-5c57e.firebasestorage.app",
+      messagingSenderId: "1017511803180",
+      appId: "1:1017511803180:web:5ccf3062e338c7a6985489"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let lastVisible = null;
+    let searchQuery = "";
+
+    async function loadBooks(nextPage = false) {
+      let q;
+
+      if (searchQuery) {
+        q = query(
+          collection(db, "books"),
+          where("searchIndex", "array-contains", searchQuery.toLowerCase()),
+          orderBy("name"),
+          limit(10)
+        );
+      } else {
+        q = query(
+          collection(db, "books"),
+          orderBy("name"),
+          limit(10)
+        );
+      }
+
+      if (nextPage && lastVisible) {
+        q = query(q, startAfter(lastVisible));
+      }
+
+      const querySnapshot = await getDocs(q);
+
+      const booksList = document.getElementById("booksList");
+      if (!nextPage) booksList.innerHTML = ""; // reset on fresh load
+
+      querySnapshot.forEach((doc) => {
+        const book = doc.data();
+        const div = document.createElement("div");
+        div.className = "book-card";
+        div.innerHTML = `
+          <img src="${book.picture || 'default-book.png'}" alt="Book" class="book-img">
+          <h3>${book.name}</h3>
+          <p>👤 ${book.author}</p>
+          <p>Status: ${book.isAvailable ? "✅ Available" : "❌ Taken"}</p>
+          ${book.isAvailable ? `<button onclick="bookNow('${doc.id}')">Book</button>` : ""}
+        `;
+        booksList.appendChild(div);
+      });
+
+      // track last doc for pagination
+      lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+    }
+
+    // Simple search
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      searchQuery = document.getElementById("searchInput").value.trim();
+      loadBooks(false);
+    });
+
+    // Expose bookNow globally
+    window.bookNow = async function(bookId) {
+      alert("Book requested: " + bookId);
+      // Later: update Firestore { isAvailable: false, bookedBy: userId }
+    }
+
+    // Load initial
+    loadBooks();
+  </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js")
+        .then(() => console.log("✅ Service Worker registered"))
+        .catch(err => console.log("❌ SW registration failed", err));
+    }
+  </script>
+</body>
+</html>
