@@ -6,7 +6,7 @@
   <title>Library Books</title>
   <link rel="stylesheet" href="style.css">
 
-  <!-- PWA Support -->
+  <!-- PWA support -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0077ff">
   <script>
@@ -20,129 +20,23 @@
   </script>
 
   <style>
-    /* Local styles for books page */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f4f6f9;
-      color: #333;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #0077ff;
-      color: #fff;
-      padding: 12px 20px;
-    }
-
-    header h2 {
-      margin: 0;
-    }
-
-    header button {
-      background: #fff;
-      color: #0077ff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .search-container {
-      display: flex;
-      justify-content: center;
-      margin: 20px;
-      gap: 10px;
-    }
-
-    .search-container input {
-      padding: 8px;
-      width: 60%;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    .search-container button {
-      padding: 8px 14px;
-      border: none;
-      background: #0077ff;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    #booksList {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .book-card {
-      background: white;
-      border-radius: 10px;
-      padding: 15px;
-      text-align: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-    }
-
-    .book-card:hover {
-      transform: scale(1.03);
-    }
-
-    .book-img {
-      width: 100px;
-      height: 140px;
-      object-fit: cover;
-      margin-bottom: 10px;
-    }
-
-    .book-card h3 {
-      font-size: 16px;
-      margin: 6px 0;
-    }
-
-    .book-card p {
-      font-size: 14px;
-      margin: 4px 0;
-      color: #555;
-    }
-
-    .book-card button {
-      margin-top: 10px;
-      padding: 6px 12px;
-      background: #0077ff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .book-card button:disabled {
-      background: gray;
-      cursor: not-allowed;
-    }
-
-    #pagination {
-      text-align: center;
-      margin: 20px;
-    }
-
-    #pagination button {
-      margin: 5px;
-      padding: 8px 12px;
-      border: none;
-      background: #0077ff;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f6f9; color:#333; }
+    header { display:flex; justify-content:space-between; align-items:center; background:#0077ff; color:#fff; padding:12px 20px; }
+    header h2 { margin:0; font-size:20px; }
+    header button { background:#fff; color:#0077ff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; }
+    .search-container { display:flex; justify-content:center; margin:20px; gap:10px; }
+    .search-container input { padding:8px; width:60%; border:1px solid #ccc; border-radius:6px; }
+    .search-container button { padding:8px 14px; border:none; background:#0077ff; color:white; border-radius:6px; cursor:pointer; }
+    #booksList { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:20px; padding:20px; }
+    .book-card { background:white; border-radius:10px; padding:15px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1); transition:transform 0.2s; }
+    .book-card:hover { transform:scale(1.03); }
+    .book-img { width:100%; aspect-ratio:2/3; object-fit:cover; border-radius:6px; margin-bottom:10px; }
+    .book-card h3 { font-size:16px; margin:6px 0; }
+    .book-card p { font-size:14px; margin:4px 0; color:#555; }
+    .book-card button { margin-top:10px; padding:6px 12px; background:#0077ff; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
+    .book-card button:disabled { background:gray; cursor:not-allowed; }
+    #pagination { text-align:center; margin:20px; }
+    #pagination button { margin:5px; padding:8px 12px; border:none; background:#0077ff; color:white; border-radius:6px; cursor:pointer; }
   </style>
 </head>
 <body>
@@ -151,25 +45,22 @@
     <button onclick="window.location.href='home.html'">⬅ Back</button>
   </header>
 
-  <!-- Search Bar -->
   <div class="search-container">
     <input type="text" id="searchInput" placeholder="Search by book name or author...">
     <button id="searchBtn">Search</button>
   </div>
 
-  <!-- Books List -->
   <div id="booksList"></div>
 
-  <!-- Pagination -->
   <div id="pagination">
     <button onclick="loadBooks(false)">⬅ Prev</button>
     <button onclick="loadBooks(true)">Next ➡</button>
   </div>
 
-  <!-- Firebase Scripts -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, query, where, limit, getDocs, orderBy, startAfter, startAt } 
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, collection, doc, query, where, orderBy, limit, startAfter, startAt, getDocs, addDoc, updateDoc, serverTimestamp } 
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -182,6 +73,7 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
     const db = getFirestore(app);
 
     let lastVisible = null;
@@ -204,28 +96,28 @@
       if (nextPage && lastVisible) q = query(q, startAfter(lastVisible));
       if (!nextPage && firstVisible) q = query(q, startAt(firstVisible));
 
-      const querySnapshot = await getDocs(q);
-
+      const snapshot = await getDocs(q);
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "";
 
-      querySnapshot.forEach((doc, index) => {
-        const book = doc.data();
-        const div = document.createElement("div");
-        div.className = "book-card";
-        div.innerHTML = `
-          <img src="${book.picture || 'default-book.png'}" alt="Book" class="book-img">
+      snapshot.forEach((docSnap, index) => {
+        const book = docSnap.data();
+        const available = book.isAvailable === true;
+        const card = document.createElement("div");
+        card.className = "book-card";
+        card.innerHTML = `
+          <img src="${book.picture || 'default-book.png'}" class="book-img" alt="Book">
           <h3>${book.name}</h3>
           <p>👤 ${book.author}</p>
-          <p>Status: ${book.isAvailable ? "✅ Available" : "❌ Taken"}</p>
-          <button ${book.isAvailable ? `onclick="bookNow('${doc.id}')"` : "disabled"}>
-            ${book.isAvailable ? "Book Now" : "Not Available"}
+          <p>Status: ${available ? "✅ Available" : "❌ Taken"}</p>
+          <button ${available ? `onclick="bookNow('${docSnap.id}')" ` : "disabled"}>
+            ${available ? "Book Now" : "Not Available"}
           </button>
         `;
-        booksList.appendChild(div);
+        booksList.appendChild(card);
 
-        if (index === 0) firstVisible = doc;
-        if (index === querySnapshot.docs.length - 1) lastVisible = doc;
+        if (index === 0) firstVisible = docSnap;
+        if (index === snapshot.docs.length - 1) lastVisible = docSnap;
       });
     }
 
@@ -237,8 +129,37 @@
     });
 
     window.bookNow = async function(bookId) {
-      alert("Book requested: " + bookId);
-      // Later: Update Firestore with booking details
+      try {
+        const user = auth.currentUser;
+        if (!user) { alert("Please log in first!"); return; }
+
+        const bookRef = doc(db, "books", bookId);
+        const bookSnap = await getDocs(bookRef);
+        const bookData = (await bookRef.get()).data();
+
+        if (!bookData || bookData.isAvailable === false) {
+          alert("❌ Book is already taken!");
+          loadBooks(true);
+          return;
+        }
+
+        // Create a booking
+        await addDoc(collection(db, "bookings"), {
+          bookId: bookId,
+          userId: user.uid,
+          bookedAt: serverTimestamp(),
+          status: "booked"
+        });
+
+        // Update book availability
+        await updateDoc(bookRef, { isAvailable: false });
+
+        alert("✅ Book successfully reserved!");
+        loadBooks(true);
+      } catch (err) {
+        console.error(err);
+        alert("❌ Error booking book: " + err.message);
+      }
     }
 
     loadBooks(true);
