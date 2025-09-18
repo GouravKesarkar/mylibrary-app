@@ -18,26 +18,6 @@
       });
     }
   </script>
-
-  <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f4f6f9; color:#333; }
-    header { display:flex; justify-content:space-between; align-items:center; background:#0077ff; color:#fff; padding:12px 20px; }
-    header h2 { margin:0; font-size:20px; }
-    header button { background:#fff; color:#0077ff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; }
-    .search-container { display:flex; justify-content:center; margin:20px; gap:10px; }
-    .search-container input { padding:8px; width:60%; border:1px solid #ccc; border-radius:6px; }
-    .search-container button { padding:8px 14px; border:none; background:#0077ff; color:white; border-radius:6px; cursor:pointer; }
-    #booksList { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:20px; padding:20px; }
-    .book-card { max-width:200px; background:white; border-radius:10px; padding:15px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1); transition:transform 0.2s; margin:auto; }
-    .book-card:hover { transform:scale(1.03); }
-    .book-img { width:100%; aspect-ratio:2/3; object-fit:cover; border-radius:6px; margin-bottom:10px; }
-    .book-card h3 { font-size:16px; margin:6px 0; }
-    .book-card p { font-size:14px; margin:4px 0; color:#555; }
-    .book-card button { margin-top:10px; padding:6px 12px; background:#0077ff; color:white; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
-    .book-card button:disabled { background:gray; cursor:not-allowed; }
-    #pagination { text-align:center; margin:20px; }
-    #pagination button { margin:5px; padding:8px 12px; border:none; background:#0077ff; color:white; border-radius:6px; cursor:pointer; }
-  </style>
 </head>
 <body>
   <header>
@@ -60,8 +40,10 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { getFirestore, collection, doc, query, where, orderBy, limit, startAfter, startAt, getDocs, getDoc, addDoc, updateDoc, serverTimestamp } 
-      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { 
+      getFirestore, collection, doc, query, where, orderBy, 
+      limit, startAfter, startAt, getDocs, getDoc, addDoc, updateDoc, serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
