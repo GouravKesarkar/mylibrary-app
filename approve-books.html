@@ -9,6 +9,7 @@
   <!-- PWA support -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0077ff">
+
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
@@ -30,14 +31,19 @@
     <button id="searchBtn">Search</button>
   </div>
 
-  <div id="booksList"></div>
+  <div id="booksList">⏳ Loading...</div>
+
+  <div id="pagination">
+    <button onclick="loadRequests(false)">⬅ Prev</button>
+    <button onclick="loadRequests(true)">Next ➡</button>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { 
       getFirestore, collection, query, where, orderBy, limit,
-      getDocs, getDoc, doc, updateDoc 
+      startAfter, startAt, getDocs, getDoc, doc, updateDoc
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -54,63 +60,63 @@
     const db = getFirestore(app);
 
     let searchQuery = "";
+    let lastVisible = null;
+    let firstVisible = null;
 
-    
-
-    async function loadRequests() {
+    async function loadRequests(nextPage = true) {
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "⏳ Loading...";
 
       try {
         let q = query(
-        collection(db, "bookings"),
-        where("status", "==", "booked"),
-        orderBy("bookedAt"),
-        limit(20)
+          collection(db, "bookings"),
+          where("status", "==", "booked"),
+          orderBy("bookedAt"),
+          limit(10)
         );
 
+        if (nextPage && lastVisible) q = query(q, startAfter(lastVisible));
+        if (!nextPage && firstVisible) q = query(q, startAt(firstVisible));
+
         const snapshot = await getDocs(q);
-        booksList.innerHTML = "";
 
         if (snapshot.empty) {
-        booksList.innerHTML = "<p>No requests found ❌</p>";
-        return;
+          booksList.innerHTML = "<p>No requests found ❌</p>";
+          return;
         }
 
-        snapshot.forEach(docSnap => {
-        console.log("📖 Booking:", docSnap.data()); // ✅ debug log
-        });
+        booksList.innerHTML = "";
+        firstVisible = snapshot.docs[0];
+        lastVisible = snapshot.docs[snapshot.docs.length - 1];
 
-        } catch (err) {
+        for (const docSnap of snapshot.docs) {
+          const booking = docSnap.data();
+          const bookingId = docSnap.id;
+
+          const bookRef = doc(db, "books", booking.bookId);
+          const bookSnap = await getDoc(bookRef);
+          const book = bookSnap.exists() ? bookSnap.data() : { name: "Unknown Book", picture: "default-book.png" };
+
+          const userRef = doc(db, "users", booking.userId);
+          const userSnap = await getDoc(userRef);
+          const user = userSnap.exists() ? userSnap.data() : { username: "Unknown User" };
+
+          const card = document.createElement("div");
+          card.className = "book-card";
+          card.innerHTML = `
+            <img src="${book.picture || 'default-book.png'}" class="book-img" alt="Book">
+            <h3>${book.name}</h3>
+            <p>👤 Requested by: ${user.username}</p>
+            <p>Status: ⏳ Pending</p>
+            <button onclick="approveRequest('${bookingId}')">✅ Approve</button>
+            <button style="background:#ff4444;" onclick="rejectRequest('${bookingId}')">❌ Reject</button>
+          `;
+          booksList.appendChild(card);
+        }
+
+      } catch (err) {
         console.error("🔥 Firestore error:", err);
         booksList.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
-        }
-
-      for (const docSnap of snapshot.docs) {
-        const booking = docSnap.data();
-        const bookingId = docSnap.id;
-
-        // fetch book details
-        const bookRef = doc(db, "books", booking.bookId);
-        const bookSnap = await getDoc(bookRef);
-        const book = bookSnap.exists() ? bookSnap.data() : { name: "Unknown Book" };
-
-        // fetch user details
-        const userRef = doc(db, "users", booking.userId);
-        const userSnap = await getDoc(userRef);
-        const user = userSnap.exists() ? userSnap.data() : { username: "Unknown User" };
-
-        const card = document.createElement("div");
-        card.className = "book-card";
-        card.innerHTML = `
-          <img src="${book.picture || 'default-book.png'}" class="book-img" alt="Book">
-          <h3>${book.name}</h3>
-          <p>👤 Requested by: ${user.username}</p>
-          <p>Status: ⏳ Pending</p>
-          <button onclick="approveRequest('${bookingId}')">Approve</button>
-          <button style="background:#ff4444;" onclick="rejectRequest('${bookingId}')">Reject</button>
-        `;
-        booksList.appendChild(card);
       }
     }
 
@@ -128,7 +134,9 @@
 
     document.getElementById("searchBtn").addEventListener("click", () => {
       searchQuery = document.getElementById("searchInput").value.trim();
-      loadRequests();
+      lastVisible = null;
+      firstVisible = null;
+      loadRequests(true);
     });
 
     loadRequests();
