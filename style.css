@@ -130,10 +130,11 @@ header button {
   width: 100%;
   aspect-ratio: 2/3;
   object-fit: cover;
-  max-height: 150px; /* smaller image height */
+  object-position: top; /* show top of image instead of center */
   border-radius: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
+
 
 .book-card h3 {
   font-size: 14px; /* smaller heading */
