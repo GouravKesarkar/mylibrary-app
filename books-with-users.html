@@ -187,7 +187,7 @@
               <td>${booking.userEmail || "Unknown User"}</td>
               <td>${issuedDate ? issuedDate.toLocaleDateString() : "N/A"}</td>
               <td>${daysWithUser} days</td>
-              <td><button class="return-btn" onclick="returnBook('${bookingId}')">Return</button></td>
+              <td><button onclick="returnBook('${bookingId}', '${booking.bookId}')">Return</button></td>
             </tr>
           `;
         }
@@ -210,11 +210,27 @@
       }
     }
 
-    window.returnBook = async function(bookingId) {
-      await updateDoc(doc(db, "bookings", bookingId), { status: "returned", returnedAt: new Date() });
-      alert("✅ Book returned!");
-      loadIssuedBooks();
+    window.returnBook = async function(bookingId, bookId) {
+    try {
+      // 1. Mark booking as returned
+      await updateDoc(doc(db, "bookings", bookingId), {
+        status: "returned",
+        returnedAt: serverTimestamp()
+      });
+
+      // 2. Mark book as available again
+      await updateDoc(doc(db, "books", bookId), {
+        isAvailable: true
+      });
+
+      alert("✅ Book returned successfully!");
+      loadIssuedBooks(); // refresh the list
+    } catch (err) {
+      console.error("❌ Error returning book:", err);
+      alert("Error: " + err.message);
     }
+  };
+
 
     document.getElementById("nextBtn").addEventListener("click", () => loadIssuedBooks("next"));
     document.getElementById("prevBtn").addEventListener("click", () => loadIssuedBooks("prev"));
