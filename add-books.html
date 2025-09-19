@@ -158,8 +158,13 @@
           name,
           author,
           picture: pictureUrl,
-          isAvailable: true
+          isAvailable: true,
+          searchIndex: [
+            name.toLowerCase(),
+            author.toLowerCase()
+          ]
         });
+
 
         alert("✅ Book added successfully!");
         e.target.reset();
