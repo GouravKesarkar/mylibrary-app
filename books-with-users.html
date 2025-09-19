@@ -187,7 +187,7 @@
               <td>${booking.userEmail || "Unknown User"}</td>
               <td>${issuedDate ? issuedDate.toLocaleDateString() : "N/A"}</td>
               <td>${daysWithUser} days</td>
-              <td><button onclick="returnBook('${bookingId}', '${booking.bookId}')">Return</button></td>
+              <td><button class="return-btn" onclick="returnBook('${bookingId}', '${booking.bookId}')">Return</button></td>
             </tr>
           `;
         }
