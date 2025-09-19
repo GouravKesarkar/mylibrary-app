@@ -65,12 +65,10 @@
     async function loadBooks(nextPage = true) {
       let q;
       if (searchQuery) {
-        const term = searchQuery.toLowerCase();
         q = query(
           collection(db, "books"),
-          orderBy("nameauthorLower"),   // 👈 need an extra field stored in lowercase
-          where("nameauthorLower", ">=", term),
-          where("nameauthorLower", "<=", term + "\uf8ff"),
+          where("searchIndex", "array-contains", searchQuery.toLowerCase()),
+          orderBy("name"),
           limit(10)
         );
       } else {

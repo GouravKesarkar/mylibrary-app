@@ -154,13 +154,28 @@
       try {
         const pictureUrl = `https://gouravkesarkar.github.io/mylibrary-app/images/${imageName}`;
 
+        function makeNGrams(word) {
+          const ngrams = [];
+          const lower = word.toLowerCase();
+          for (let i = 1; i <= lower.length; i++) {
+            ngrams.push(lower.substring(0, i));
+          }
+          return ngrams;
+        }
+
+        function buildTokens(name, author) {
+          const allWords = (name + " " + author).toLowerCase().split(/\s+/);
+          return allWords.flatMap(makeNGrams);
+        }
+
+        // Saving document
         await addDoc(collection(db, "books"), {
           name,
           author,
-          nameauthorLower: name.toLowerCase() + author.toLowerCase(),
+          searchIndex: buildTokens(name, author), // 👈 n-gram tokens array
           picture: pictureUrl,
           isAvailable: true,
-       });
+        });
 
 
         alert("✅ Book added successfully!");
