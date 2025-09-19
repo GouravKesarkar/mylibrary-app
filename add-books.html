@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>➕ Add Book</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- PWA Support -->
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#0077ff"/>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js")
+          .then(() => console.log("✅ Service Worker registered"))
+          .catch(err => console.log("❌ SW registration failed", err));
+      });
+    }
+  </script>
+
+  <style>
+    .container { max-width: 600px; margin: auto; padding: 20px; }
+    form.add-book { margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; }
+    form.add-book h3 { margin-bottom: 15px; color: #0077ff; }
+    form.add-book input, form.add-book button {
+      width: 100%; padding: 10px; margin: 8px 0;
+      border: 1px solid #ccc; border-radius: 6px;
+    }
+    form.add-book button {
+      background: #0077ff; color: #fff; font-size: 16px;
+      cursor: pointer; transition: background 0.3s ease;
+    }
+    form.add-book button:hover { background: #005fcc; }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>➕ Add Book</h2>
+    <button onclick="window.location.href='book-management.html'">⬅ Back</button>
+  </header>
+
+  <div class="container">
+    <!-- Add Book Form -->
+    <form class="add-book" id="addBookForm">
+      <h3>Enter Book Details</h3>
+      <input type="text" id="bookName" placeholder="Book Name" required />
+      <input type="text" id="bookAuthor" placeholder="Author" required />
+      <input type="file" id="bookImage" accept="image/*" />
+      <button type="submit">Add Book</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
+      authDomain: "mylibrary-app-5c57e.firebaseapp.com",
+      projectId: "mylibrary-app-5c57e",
+      storageBucket: "mylibrary-app-5c57e.appspot.com",
+      messagingSenderId: "1017511803180",
+      appId: "1:1017511803180:web:5ccf3062e338c7a6985489"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // ✅ Add Book
+    document.getElementById("addBookForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("bookName").value.trim();
+      const author = document.getElementById("bookAuthor").value.trim();
+      const file = document.getElementById("bookImage").files[0];
+
+      if (!name || !author) {
+        alert("❌ Please fill all fields!");
+        return;
+      }
+
+      let imageUrl = "";
+      if (file) {
+        const storageRef = ref(storage, "books/" + Date.now() + "-" + file.name);
+        await uploadBytes(storageRef, file);
+        imageUrl = await getDownloadURL(storageRef);
+      }
+
+      await addDoc(collection(db, "books"), {
+        name,
+        author,
+        picture: imageUrl,
+        isAvailable: false,   // ⛔ default set to false
+        searchindex: [name.toLowerCase(), author.toLowerCase()]
+      });
+
+      alert("✅ Book added successfully!");
+      document.getElementById("addBookForm").reset();
+    });
+  </script>
+</body>
+</html>
