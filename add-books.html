@@ -18,84 +18,12 @@
       });
     }
   </script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f5f5f5;
-    }
-    header {
-      display: flex;
-      justify-content: flex-start;
-      padding: 10px 20px;
-      background: #0077ff;
-      color: white;
-    }
-    header button {
-      margin-left: auto;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 5px;
-      background: #fff;
-      color: #0077ff;
-      cursor: pointer;
-    }
-    header button:hover {
-      background: #e6e6e6;
-    }
-    h2.page-title {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 28px;
-      color: #0077ff;
-    }
-    form.add-book {
-      margin: 30px auto;
-      padding: 25px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      width: 100%;
-      max-width: 400px;
-      background: white;
-      box-shadow: 0px 3px 6px rgba(0,0,0,0.1);
-    }
-    form.add-book h3 {
-      margin-top: 0;
-      text-align: center;
-      color: #333;
-    }
-    form.add-book input {
-      display: block;
-      width: 100%;
-      margin: 12px 0;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-    }
-    form.add-book button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 5px;
-      background: #28a745;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    form.add-book button:hover {
-      background: #218838;
-    }
-  </style>
 </head>
 <body>
   <header>
-    <span>📘 My Library</span>
+    <h2>➕ Add New Book</h2>
     <button onclick="window.location.href='book-management.html'">⬅ Back</button>
   </header>
-
-  <h2 class="page-title">➕ Add New Book</h2>
 
   <form class="add-book" id="addBookForm">
     <h3>Book Details</h3>
@@ -107,7 +35,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
@@ -140,7 +68,7 @@
           name,
           author,
           picture: pictureUrl,
-          isAvailable: true
+          isAvailable: true  /* 🔹 default to false as per your requirement */
         });
 
         alert("✅ Book added successfully!");
