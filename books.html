@@ -111,36 +111,36 @@
     });
 
     window.bookNow = async function(bookId) {
-  try {
-    const user = auth.currentUser;
-    if (!user) { 
-      alert("Please log in first!"); 
-      return; 
-    }
+    try {
+      const user = auth.currentUser;
+      if (!user) { 
+        alert("Please log in first!"); 
+        return; 
+      }
 
-    // 1️⃣ Check if user already has a booked book
-    const userBookingQuery = query(
-      collection(db, "bookings"),
-      where("userId", "==", user.uid),
-      where("status", "==", "booked")
-    );
-    const userBookingSnapshot = await getDocs(userBookingQuery);
+      // 1️⃣ Check if user already has a booked book
+      const userBookingQuery = query(
+        collection(db, "bookings"),
+        where("userId", "==", user.uid),
+        where("status", "in", ["booked", "approved"])
+      );
+      const userBookingSnapshot = await getDocs(userBookingQuery);
 
-    if (!userBookingSnapshot.empty) {
-      alert("❌ You already have a book booked. Return it before booking a new one.");
-      return;
-    }
+      if (!userBookingSnapshot.empty) {
+        alert("❌ You already have a book booked. Return it before booking a new one.");
+        return;
+      }
 
-    // 2️⃣ Check if book is available
-    const bookRef = doc(db, "books", bookId);
-    const bookSnap = await getDoc(bookRef);
-    const bookData = bookSnap.data();
+      // 2️⃣ Check if book is available
+      const bookRef = doc(db, "books", bookId);
+      const bookSnap = await getDoc(bookRef);
+      const bookData = bookSnap.data();
 
-    if (!bookData || bookData.isAvailable === false) {
-      alert("❌ Book is already taken!");
-      loadBooks(true);
-      return;
-    }
+      if (!bookData || bookData.isAvailable === false) {
+        alert("❌ Book is already taken!");
+        loadBooks(true);
+        return;
+      }
 
     // 3️⃣ Create a booking
     await addDoc(collection(db, "bookings"), {
