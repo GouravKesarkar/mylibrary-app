@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>➕ Add Book</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Add New Book</title>
+  <link rel="stylesheet" href="style.css"/>
 
-  <!-- PWA Support -->
+  <!-- PWA support -->
   <link rel="manifest" href="manifest.json"/>
   <meta name="theme-color" content="#0077ff"/>
   <script>
@@ -20,86 +20,124 @@
   </script>
 
   <style>
-    .container { max-width: 600px; margin: auto; padding: 20px; }
-    form.add-book { margin-top: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; }
-    form.add-book h3 { margin-bottom: 15px; color: #0077ff; }
-    form.add-book input, form.add-book button {
-      width: 100%; padding: 10px; margin: 8px 0;
-      border: 1px solid #ccc; border-radius: 6px;
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h2 {
+      margin: 0;
+      color: #0077ff;
+    }
+    header button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      background: #0077ff;
+      color: white;
+      cursor: pointer;
+    }
+    header button:hover {
+      background: #005fcc;
+    }
+    form.add-book {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      max-width: 400px;
+      background: #f9f9f9;
+    }
+    form.add-book h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    form.add-book input {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
     form.add-book button {
-      background: #0077ff; color: #fff; font-size: 16px;
-      cursor: pointer; transition: background 0.3s ease;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #28a745;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
     }
-    form.add-book button:hover { background: #005fcc; }
+    form.add-book button:hover {
+      background: #218838;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h2>➕ Add Book</h2>
+    <h2>📘 Add New Book</h2>
     <button onclick="window.location.href='book-management.html'">⬅ Back</button>
   </header>
 
-  <div class="container">
-    <!-- Add Book Form -->
-    <form class="add-book" id="addBookForm">
-      <h3>Enter Book Details</h3>
-      <input type="text" id="bookName" placeholder="Book Name" required />
-      <input type="text" id="bookAuthor" placeholder="Author" required />
-      <input type="file" id="bookImage" accept="image/*" />
-      <button type="submit">Add Book</button>
-    </form>
-  </div>
+  <form class="add-book" id="addBookForm">
+    <h3>Enter Book Details</h3>
+    <input type="text" id="bookName" placeholder="Book Name" required />
+    <input type="text" id="bookAuthor" placeholder="Author" required />
+    <input type="text" id="bookImageName" placeholder="Image Name (e.g. harrypotter-1.jpg)" required />
+    <button type="submit">Add Book</button>
+  </form>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } 
-      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } 
-      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
       authDomain: "mylibrary-app-5c57e.firebaseapp.com",
       projectId: "mylibrary-app-5c57e",
-      storageBucket: "mylibrary-app-5c57e.appspot.com",
+      storageBucket: "mylibrary-app-5c57e.firebasestorage.app",
       messagingSenderId: "1017511803180",
       appId: "1:1017511803180:web:5ccf3062e338c7a6985489"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
 
-    // ✅ Add Book
     document.getElementById("addBookForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const name = document.getElementById("bookName").value.trim();
       const author = document.getElementById("bookAuthor").value.trim();
-      const file = document.getElementById("bookImage").files[0];
+      const imageName = document.getElementById("bookImageName").value.trim();
 
-      if (!name || !author) {
-        alert("❌ Please fill all fields!");
+      if (!name || !author || !imageName) {
+        alert("⚠ Please fill all fields");
         return;
       }
 
-      let imageUrl = "";
-      if (file) {
-        const storageRef = ref(storage, "books/" + Date.now() + "-" + file.name);
-        await uploadBytes(storageRef, file);
-        imageUrl = await getDownloadURL(storageRef);
+      try {
+        const pictureUrl = `https://gouravkesarkar.github.io/mylibrary-app/images/${imageName}`;
+
+        await addDoc(collection(db, "books"), {
+          name,
+          author,
+          picture: pictureUrl,
+          isAvailable: false,   // book is not available immediately
+          createdAt: serverTimestamp()
+        });
+
+        alert("✅ Book added successfully!");
+        e.target.reset();
+      } catch (err) {
+        console.error("🔥 Error adding book:", err);
+        alert("❌ Error: " + err.message);
       }
-
-      await addDoc(collection(db, "books"), {
-        name,
-        author,
-        picture: imageUrl,
-        isAvailable: false,   // ⛔ default set to false
-        searchindex: [name.toLowerCase(), author.toLowerCase()]
-      });
-
-      alert("✅ Book added successfully!");
-      document.getElementById("addBookForm").reset();
     });
   </script>
 </body>
