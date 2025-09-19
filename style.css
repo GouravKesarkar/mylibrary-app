@@ -108,7 +108,6 @@ header button {
   padding: 20px;
 }
 .book-card {
-  /* remove width:200px and margin:auto */
   background: white;
   border-radius: 10px;
   padding: 15px;
@@ -117,14 +116,18 @@ header button {
   transition: transform 0.2s;
   display: flex;
   flex-direction: column;
+  /* max-width keeps cards from being too wide on big screens */
+  max-width: 220px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .book-card:hover {
   transform: scale(1.03);
 }
 .book-img {
   width: 100%;
-  aspect-ratio: 2/3;
-  object-fit: cover;
+  max-height: 180px;   /* keeps image from getting too tall */
+  object-fit: cover;    /* maintain aspect ratio and crop if needed */
   border-radius: 6px;
   margin-bottom: 10px;
 }
