@@ -129,6 +129,7 @@
         await addDoc(collection(db, "bookings"), {
           bookId: bookId,
           userId: user.uid,
+          userEmail: user.email,
           bookedAt: serverTimestamp(),
           status: "booked"
         });

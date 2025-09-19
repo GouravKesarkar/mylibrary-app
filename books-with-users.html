@@ -177,14 +177,15 @@
           const user = userSnap.exists() ? userSnap.data() : { username: "Unknown User" };
 
           // issued date + days calculation
-          const issuedDate = booking.bookedAt?.toDate ? booking.bookedAt.toDate() : new Date();
-          const daysWithUser = Math.floor((Date.now() - issuedDate.getTime()) / (1000 * 60 * 60 * 24));
+          const issuedDate = booking.issuedAt?.toDate ? booking.issuedAt.toDate() : null;
+          const daysWithUser = issuedDate ? Math.floor((Date.now() - issuedDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+
 
           tableHTML += `
             <tr>
               <td>${book.name}</td>
-              <td>${user.username}</td>
-              <td>${issuedDate.toLocaleDateString()}</td>
+              <td>${booking.userEmail || "Unknown User"}</td>
+              <td>${issuedDate ? issuedDate.toLocaleDateString() : "N/A"}</td>
               <td>${daysWithUser} days</td>
               <td><button class="return-btn" onclick="returnBook('${bookingId}')">Return</button></td>
             </tr>
