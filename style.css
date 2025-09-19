@@ -108,14 +108,15 @@ header button {
   padding: 20px;
 }
 .book-card {
-  width: 200px;
+  /* remove width:200px and margin:auto */
   background: white;
   border-radius: 10px;
   padding: 15px;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: transform 0.2s;
-  margin: auto;
+  display: flex;
+  flex-direction: column;
 }
 .book-card:hover {
   transform: scale(1.03);
