@@ -6,6 +6,8 @@ const ASSETS = [
   "/books.html",
   "/mybooks.html",
   "/book-management.html",
+  "/approve-books.html",
+  "/books-with-user.html",
   "/style.css",
   "/manifest.json",
   "/icon/mylibrary-icon-192.png"

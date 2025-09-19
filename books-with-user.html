@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Books With Users</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- PWA support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0077ff">
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js")
+          .then(() => console.log("✅ Service Worker registered"))
+          .catch(err => console.log("❌ SW registration failed", err));
+      });
+    }
+  </script>
+
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #0077ff;
+      color: white;
+    }
+    tr:nth-child(even) { background: #f9f9f9; }
+    tr:hover { background: #f1f1f1; }
+    button.return-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button.return-btn:hover {
+      background: #218838;
+    }
+    .pagination {
+      margin-top: 15px;
+      text-align: center;
+    }
+    .pagination button {
+      padding: 8px 12px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #0077ff;
+      color: white;
+    }
+    .pagination button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>📚 Books With Users</h2>
+    <button onclick="window.location.href='book-management.html'">⬅ Back</button>
+  </header>
+
+  <div id="booksTableContainer">⏳ Loading...</div>
+
+  <div class="pagination">
+    <button id="prevBtn" disabled>⬅ Prev</button>
+    <button id="nextBtn" disabled>Next ➡</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { 
+      getFirestore, collection, query, where, orderBy, getDocs, getDoc, doc, updateDoc, limit, startAfter, endBefore
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
+      authDomain: "mylibrary-app-5c57e.firebaseapp.com",
+      projectId: "mylibrary-app-5c57e",
+      storageBucket: "mylibrary-app-5c57e.firebasestorage.app",
+      messagingSenderId: "1017511803180",
+      appId: "1:1017511803180:web:5ccf3062e338c7a6985489"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore(app);
+
+    const pageSize = 10; // rows per page
+    let lastVisible = null;
+    let firstVisible = null;
+    let prevSnapshots = [];
+
+    async function loadIssuedBooks(direction = "first") {
+      const container = document.getElementById("booksTableContainer");
+      container.innerHTML = "⏳ Loading...";
+
+      try {
+        let q;
+
+        if (direction === "next" && lastVisible) {
+          q = query(
+            collection(db, "bookings"),
+            where("status", "==", "approved"),
+            orderBy("bookedAt", "desc"),
+            startAfter(lastVisible),
+            limit(pageSize)
+          );
+        } else if (direction === "prev" && prevSnapshots.length > 0) {
+          const prevCursor = prevSnapshots.pop();
+          q = query(
+            collection(db, "bookings"),
+            where("status", "==", "approved"),
+            orderBy("bookedAt", "desc"),
+            startAfter(prevCursor),
+            limit(pageSize)
+          );
+        } else {
+          q = query(
+            collection(db, "bookings"),
+            where("status", "==", "approved"),
+            orderBy("bookedAt", "desc"),
+            limit(pageSize)
+          );
+          prevSnapshots = []; // reset history
+        }
+
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) {
+          container.innerHTML = "<p>No active issued books ❌</p>";
+          document.getElementById("nextBtn").disabled = true;
+          return;
+        }
+
+        firstVisible = snapshot.docs[0];
+        lastVisible = snapshot.docs[snapshot.docs.length - 1];
+
+        let tableHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Book Name</th>
+                <th>User</th>
+                <th>Issued On</th>
+                <th>Days With User</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        for (const docSnap of snapshot.docs) {
+          const booking = docSnap.data();
+          const bookingId = docSnap.id;
+
+          // fetch book details
+          const bookRef = doc(db, "books", booking.bookId);
+          const bookSnap = await getDoc(bookRef);
+          const book = bookSnap.exists() ? bookSnap.data() : { name: "Unknown Book" };
+
+          // fetch user details
+          const userRef = doc(db, "users", booking.userId);
+          const userSnap = await getDoc(userRef);
+          const user = userSnap.exists() ? userSnap.data() : { username: "Unknown User" };
+
+          // issued date + days calculation
+          const issuedDate = booking.bookedAt?.toDate ? booking.bookedAt.toDate() : new Date();
+          const daysWithUser = Math.floor((Date.now() - issuedDate.getTime()) / (1000 * 60 * 60 * 24));
+
+          tableHTML += `
+            <tr>
+              <td>${book.name}</td>
+              <td>${user.username}</td>
+              <td>${issuedDate.toLocaleDateString()}</td>
+              <td>${daysWithUser} days</td>
+              <td><button class="return-btn" onclick="returnBook('${bookingId}')">Return</button></td>
+            </tr>
+          `;
+        }
+
+        tableHTML += "</tbody></table>";
+        container.innerHTML = tableHTML;
+
+        // enable/disable pagination buttons
+        document.getElementById("prevBtn").disabled = prevSnapshots.length === 0;
+        document.getElementById("nextBtn").disabled = snapshot.size < pageSize;
+
+        // save cursor for prev
+        if (direction === "next") {
+          prevSnapshots.push(firstVisible);
+        }
+
+      } catch (err) {
+        console.error("🔥 Firestore error:", err);
+        container.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+      }
+    }
+
+    window.returnBook = async function(bookingId) {
+      await updateDoc(doc(db, "bookings", bookingId), { status: "returned", returnedAt: new Date() });
+      alert("✅ Book returned!");
+      loadIssuedBooks();
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", () => loadIssuedBooks("next"));
+    document.getElementById("prevBtn").addEventListener("click", () => loadIssuedBooks("prev"));
+
+    loadIssuedBooks();
+  </script>
+</body>
+</html>
