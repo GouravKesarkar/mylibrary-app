@@ -104,10 +104,10 @@ header button {
 /* ======================= Book Cards Container ======================= */
 #booksList {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
   padding: 16px;
-  align-items: stretch; /* ensures all cards in a row have same height */
+  align-items: stretch;
   box-sizing: border-box;
 }
 
@@ -131,12 +131,12 @@ header button {
 /* ======================= Book Image ======================= */
 .book-img {
   width: 100%;
-  aspect-ratio: 2/3;      /* keeps image proportional */
+  aspect-ratio: 2/3;
   object-fit: cover;
-  object-position: top;    /* top of image visible */
+  object-position: top;
   border-radius: 6px;
   margin-bottom: 10px;
-  flex-shrink: 0;          /* prevent shrinking */
+  flex-shrink: 0;
 }
 
 /* ======================= Book Title ======================= */
@@ -144,7 +144,7 @@ header button {
   font-size: 15px;
   margin: 4px 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;   /* max 3 lines */
+  -webkit-line-clamp: 3; /* max 3 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -156,16 +156,16 @@ header button {
   margin: 3px 0;
   color: #555;
   display: -webkit-box;
-  -webkit-line-clamp: 2;   /* max 2 lines */
+  -webkit-line-clamp: 2; /* max 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex-grow: 1;            /* pushes button to bottom */
+  flex-grow: 1;
 }
 
 /* ======================= Button ======================= */
 .book-card button {
-  margin-top: auto;        /* always at bottom */
+  margin-top: auto;
   padding: 5px 10px;
   background: #0077ff;
   color: white;
@@ -181,9 +181,9 @@ header button {
 }
 
 /* ======================= Mobile Responsive ======================= */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   #booksList {
-    grid-template-columns: 1fr; /* stack cards on small screens */
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
     gap: 12px;
     padding: 12px;
   }
@@ -207,6 +207,13 @@ header button {
   .book-card button {
     font-size: 12px;
     padding: 4px 8px;
+  }
+}
+
+/* Extra small phones (stack 1 per row) */
+@media (max-width: 400px) {
+  #booksList {
+    grid-template-columns: 1fr; /* 1 card per row */
   }
 }
 
