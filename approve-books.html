@@ -110,7 +110,7 @@
             <p>👤 Requested by: ${user.username}</p>
             <p>Status: ⏳ Pending</p>
             <button onclick="approveRequest('${bookingId}')">✅ Approve</button>
-            <button style="background:#ff4444;" onclick="rejectRequest('${bookingId}')">❌ Reject</button>
+            <button style="background:#ff4444;" onclick="rejectRequest('${bookingId}', '${booking.bookId}')">❌ Reject</button>
           `;
           booksList.appendChild(card);
         }
@@ -128,11 +128,24 @@
       loadRequests();
     }
 
-    window.rejectRequest = async function(bookingId) {
+    window.rejectRequest = async function(bookingId, bookId) {
+    try {
+      // 1. Mark booking as rejected
       await updateDoc(doc(db, "bookings", bookingId), { status: "rejected" });
-      alert("❌ Request rejected!");
+
+      // 2. Mark book as available again
+      await updateDoc(doc(db, "books", bookId), {
+        isAvailable: true
+      });
+
+      alert("❌ Request rejected and book marked available again!");
       loadRequests();
+    } catch (err) {
+      console.error("🔥 Error rejecting request:", err);
+      alert("Error: " + err.message);
     }
+  };
+
 
     document.getElementById("searchBtn").addEventListener("click", () => {
       searchQuery = document.getElementById("searchInput").value.trim();

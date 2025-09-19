@@ -83,7 +83,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { 
-      getFirestore, collection, query, where, orderBy, getDocs, getDoc, doc, updateDoc, limit, startAfter, endBefore
+      getFirestore, collection, query, where, orderBy, getDocs, getDoc,
+      doc, updateDoc, limit, startAfter, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -171,15 +172,9 @@
           const bookSnap = await getDoc(bookRef);
           const book = bookSnap.exists() ? bookSnap.data() : { name: "Unknown Book" };
 
-          // fetch user details
-          const userRef = doc(db, "users", booking.userId);
-          const userSnap = await getDoc(userRef);
-          const user = userSnap.exists() ? userSnap.data() : { username: "Unknown User" };
-
           // issued date + days calculation
           const issuedDate = booking.issuedAt?.toDate ? booking.issuedAt.toDate() : null;
           const daysWithUser = issuedDate ? Math.floor((Date.now() - issuedDate.getTime()) / (1000 * 60 * 60 * 24)) : 0;
-
 
           tableHTML += `
             <tr>
@@ -211,26 +206,25 @@
     }
 
     window.returnBook = async function(bookingId, bookId) {
-    try {
-      // 1. Mark booking as returned
-      await updateDoc(doc(db, "bookings", bookingId), {
-        status: "returned",
-        returnedAt: serverTimestamp()
-      });
+      try {
+        // 1. Mark booking as returned
+        await updateDoc(doc(db, "bookings", bookingId), {
+          status: "returned",
+          returnedAt: serverTimestamp()
+        });
 
-      // 2. Mark book as available again
-      await updateDoc(doc(db, "books", bookId), {
-        isAvailable: true
-      });
+        // 2. Mark book as available again
+        await updateDoc(doc(db, "books", bookId), {
+          isAvailable: true
+        });
 
-      alert("✅ Book returned successfully!");
-      loadIssuedBooks(); // refresh the list
-    } catch (err) {
-      console.error("❌ Error returning book:", err);
-      alert("Error: " + err.message);
-    }
-  };
-
+        alert("✅ Book returned successfully!");
+        loadIssuedBooks(); // refresh the list
+      } catch (err) {
+        console.error("❌ Error returning book:", err);
+        alert("Error: " + err.message);
+      }
+    };
 
     document.getElementById("nextBtn").addEventListener("click", () => loadIssuedBooks("next"));
     document.getElementById("prevBtn").addEventListener("click", () => loadIssuedBooks("prev"));
