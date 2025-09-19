@@ -91,29 +91,26 @@
         lastVisible = snapshot.docs[snapshot.docs.length - 1];
 
         for (const docSnap of snapshot.docs) {
-          const booking = docSnap.data();
-          const bookingId = docSnap.id;
+            const booking = docSnap.data();
+            const bookingId = docSnap.id;
 
-          const bookRef = doc(db, "books", booking.bookId);
-          const bookSnap = await getDoc(bookRef);
-          const book = bookSnap.exists() ? bookSnap.data() : { name: "Unknown Book", picture: "default-book.png" };
+            const bookRef = doc(db, "books", booking.bookId);
+            const bookSnap = await getDoc(bookRef);
+            const book = bookSnap.exists() ? bookSnap.data() : { name: "Unknown Book", picture: "default-book.png" };
 
-          const userRef = doc(db, "users", booking.userId);
-          const userSnap = await getDoc(userRef);
-          const user = userSnap.exists() ? userSnap.data() : { username: "Unknown User" };
+            const card = document.createElement("div");
+            card.className = "book-card";
+            card.innerHTML = `
+              <img src="${book.picture || 'default-book.png'}" class="book-img" alt="Book">
+              <h3>${book.name}</h3>
+              <p>👤 Requested by: ${booking.userEmail || "Unknown User"}</p>
+              <p>Status: ⏳ Pending</p>
+              <button onclick="approveRequest('${bookingId}')">✅ Approve</button>
+              <button style="background:#ff4444;" onclick="rejectRequest('${bookingId}', '${booking.bookId}')">❌ Reject</button>
+            `;
+            booksList.appendChild(card);
+          }
 
-          const card = document.createElement("div");
-          card.className = "book-card";
-          card.innerHTML = `
-            <img src="${book.picture || 'default-book.png'}" class="book-img" alt="Book">
-            <h3>${book.name}</h3>
-            <p>👤 Requested by: ${user.username}</p>
-            <p>Status: ⏳ Pending</p>
-            <button onclick="approveRequest('${bookingId}')">✅ Approve</button>
-            <button style="background:#ff4444;" onclick="rejectRequest('${bookingId}', '${booking.bookId}')">❌ Reject</button>
-          `;
-          booksList.appendChild(card);
-        }
 
       } catch (err) {
         console.error("🔥 Firestore error:", err);
