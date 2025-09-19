@@ -101,58 +101,113 @@ header button {
 }
 
 /* ✅ Book Cards */
+/* ======================= Book Cards Container ======================= */
 #booksList {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 20px;
-  padding: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  align-items: stretch; /* ensures all cards in a row have same height */
+  box-sizing: border-box;
 }
+
+/* ======================= Individual Book Card ======================= */
 .book-card {
   background: white;
   border-radius: 10px;
-  padding: 15px;
-  text-align: center;
+  padding: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: transform 0.2s;
   display: flex;
   flex-direction: column;
-  /* max-width keeps cards from being too wide on big screens */
-  max-width: 220px;
   width: 100%;
   box-sizing: border-box;
+  transition: transform 0.2s;
 }
+
 .book-card:hover {
   transform: scale(1.03);
 }
+
+/* ======================= Book Image ======================= */
 .book-img {
   width: 100%;
-  max-height: 180px;   /* keeps image from getting too tall */
-  object-fit: cover;    /* maintain aspect ratio and crop if needed */
+  aspect-ratio: 2/3;      /* keeps image proportional */
+  object-fit: cover;
+  object-position: top;    /* top of image visible */
   border-radius: 6px;
   margin-bottom: 10px;
+  flex-shrink: 0;          /* prevent shrinking */
 }
+
+/* ======================= Book Title ======================= */
 .book-card h3 {
-  font-size: 16px;
-  margin: 6px 0;
-}
-.book-card p {
-  font-size: 14px;
+  font-size: 15px;
   margin: 4px 0;
-  color: #555;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;   /* max 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+/* ======================= Author ======================= */
+.book-card p {
+  font-size: 13px;
+  margin: 3px 0;
+  color: #555;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;   /* max 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;            /* pushes button to bottom */
+}
+
+/* ======================= Button ======================= */
 .book-card button {
-  margin-top: 10px;
-  padding: 6px 12px;
+  margin-top: auto;        /* always at bottom */
+  padding: 5px 10px;
   background: #0077ff;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
 }
+
 .book-card button:disabled {
   background: gray;
   cursor: not-allowed;
+}
+
+/* ======================= Mobile Responsive ======================= */
+@media (max-width: 480px) {
+  #booksList {
+    grid-template-columns: 1fr; /* stack cards on small screens */
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .book-card {
+    padding: 10px;
+  }
+
+  .book-img {
+    margin-bottom: 8px;
+  }
+
+  .book-card h3 {
+    font-size: 14px;
+  }
+
+  .book-card p {
+    font-size: 12px;
+  }
+
+  .book-card button {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
 }
 
 
