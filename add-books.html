@@ -157,13 +157,10 @@
         await addDoc(collection(db, "books"), {
           name,
           author,
+          nameauthorLower: name.toLowerCase() + author.toLowerCase(),
           picture: pictureUrl,
           isAvailable: true,
-          searchIndex: [
-            name.toLowerCase(),
-            author.toLowerCase()
-          ]
-        });
+       });
 
 
         alert("✅ Book added successfully!");

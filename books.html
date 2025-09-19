@@ -40,6 +40,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { query, collection, orderBy, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { 
       getFirestore, collection, doc, query, where, orderBy, 
       limit, startAfter, startAt, getDocs, getDoc, addDoc, updateDoc, serverTimestamp 
@@ -65,10 +66,12 @@
     async function loadBooks(nextPage = true) {
       let q;
       if (searchQuery) {
+        const term = searchQuery.toLowerCase();
         q = query(
           collection(db, "books"),
-          where("searchIndex", "array-contains", searchQuery.toLowerCase()),
-          orderBy("name"),
+          orderBy("nameauthorLower"),   // 👈 need an extra field stored in lowercase
+          where("nameauthorLower", ">=", term),
+          where("nameauthorLower", "<=", term + "\uf8ff"),
           limit(10)
         );
       } else {
