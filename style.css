@@ -107,7 +107,7 @@ header button {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   padding: 16px;
-  align-items: stretch; /* ensures all cards in a row have same height */
+  align-items: stretch; /* all cards in a row same height */
   box-sizing: border-box;
 }
 
@@ -133,7 +133,7 @@ header button {
   width: 100%;
   aspect-ratio: 2/3;      /* proportional height */
   object-fit: cover;
-  object-position: top;    /* top always visible */
+  object-position: top;    /* show top of image */
   border-radius: 6px;
   margin-bottom: 10px;
   flex-shrink: 0;
@@ -181,9 +181,11 @@ header button {
 }
 
 /* ======================= Mobile Responsive ======================= */
+
+/* Small phones/tablets: force 2 cards per row */
 @media (max-width: 600px) and (min-width: 400px) {
   #booksList {
-    grid-template-columns: repeat(2, 1fr); /* exactly 2 cards per row */
+    grid-template-columns: 1fr 1fr; /* 2 cards per row */
     gap: 12px;
     padding: 12px;
   }
@@ -210,9 +212,12 @@ header button {
   }
 }
 
-@media (max-width: 400px) {
+/* Extra small phones: stack 1 card per row */
+@media (max-width: 399px) {
   #booksList {
     grid-template-columns: 1fr; /* 1 card per row */
+    gap: 10px;
+    padding: 10px;
   }
 }
 
