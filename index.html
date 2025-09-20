@@ -71,35 +71,46 @@
       }
     });
 
-    // ✅ Login Button
+    // ✅ Login Button  
     document.getElementById("loginBtn").addEventListener("click", async () => {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
       const errorMsg = document.getElementById("error-msg");
 
       try {
-        // Authenticate
+        // 1️⃣ Sign in with Firebase Auth
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Fetch Role from Firestore
+        // 2️⃣ Fetch user document from Firestore
         const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const role = userDoc.data().role;
 
-          // Save role to localStorage
-          localStorage.setItem("userRole", role);
-          localStorage.setItem("userEmail", email);
-
-          // Redirect
-          window.location.href = "home.html";
-        } else {
-          errorMsg.textContent = "⚠️ User role not found. Contact Admin.";
+        if (!userDoc.exists()) {
+          errorMsg.textContent = "⚠️ User not found in database. Contact Admin.";
+          return;
         }
+
+        const userData = userDoc.data();
+
+        // 3️⃣ Check if requestApproved is true
+        if (!userData.requestApproved) {
+          errorMsg.textContent = "❌ Your registration is pending approval. Please wait.";
+          await auth.signOut(); // sign out user from Auth
+          return;
+        }
+
+        // 4️⃣ Store role and email in localStorage
+        localStorage.setItem("userRole", userData.role);
+        localStorage.setItem("userEmail", user.email);
+
+        // 5️⃣ Redirect to home page
+        window.location.href = "home.html";
+
       } catch (error) {
         errorMsg.textContent = "❌ " + error.message;
       }
     });
+
   </script>
 
   <!-- ✅ Service Worker Registration -->
