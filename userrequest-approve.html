@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Registration Approval</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- PWA support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0077ff">
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/service-worker.js")
+          .then(() => console.log("✅ Service Worker registered"))
+          .catch(err => console.log("❌ SW registration failed", err));
+      });
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <h2>📝 User Registration Approval</h2>
+    <button onclick="window.location.href='home.html'">⬅ Back</button>
+  </header>
+
+  <div id="usersTableContainer">⏳ Loading...</div>
+
+  <div class="pagination">
+    <button id="prevBtn" disabled>⬅ Prev</button>
+    <button id="nextBtn" disabled>Next ➡</button>
+  </div>
+
+  <div id="toast"></div>
+
+  <footer>
+    <p>© 2025 Meera's Book Collection </p>
+    <a href="https://wa.me/?text=📚%20Check%20out%20this%20Mythology%20Stories%20App!%20Install%20it%20here:%20https://mythology-stories.netlify.app/"
+       class="share-btn" target="_blank" rel="noopener">📤 Share via WhatsApp</a>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, query, where, orderBy, getDocs, doc, updateDoc, limit, startAfter } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
+      authDomain: "mylibrary-app-5c57e.firebaseapp.com",
+      projectId: "mylibrary-app-5c57e",
+      storageBucket: "mylibrary-app-5c57e.firebasestorage.app",
+      messagingSenderId: "1017511803180",
+      appId: "1:1017511803180:web:5ccf3062e338c7a6985489"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const pageSize = 10;
+    let lastVisible = null;
+    let prevSnapshots = [];
+
+    async function loadPendingUsers(direction = "first") {
+      const container = document.getElementById("usersTableContainer");
+      container.innerHTML = "⏳ Loading...";
+
+      try {
+        let q;
+
+        if (direction === "next" && lastVisible) {
+          q = query(
+            collection(db, "users"),
+            where("requestApproved", "==", false),
+            orderBy("email"),
+            startAfter(lastVisible),
+            limit(pageSize)
+          );
+        } else if (direction === "prev" && prevSnapshots.length > 0) {
+          const prevCursor = prevSnapshots.pop();
+          q = query(
+            collection(db, "users"),
+            where("requestApproved", "==", false),
+            orderBy("email"),
+            startAfter(prevCursor),
+            limit(pageSize)
+          );
+        } else {
+          q = query(
+            collection(db, "users"),
+            where("requestApproved", "==", false),
+            orderBy("email"),
+            limit(pageSize)
+          );
+          prevSnapshots = [];
+        }
+
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          container.innerHTML = "<p>No pending user requests ❌</p>";
+          document.getElementById("nextBtn").disabled = true;
+          return;
+        }
+
+        lastVisible = snapshot.docs[snapshot.docs.length - 1];
+
+        let tableHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Request Time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        for (const docSnap of snapshot.docs) {
+          const user = docSnap.data();
+          const userId = docSnap.id;
+          const createdAt = user.createdAt?.toDate ? user.createdAt.toDate().toLocaleString() : "N/A";
+
+          tableHTML += `
+            <tr>
+              <td>${user.name || "N/A"}</td>
+              <td>${user.email}</td>
+              <td>${user.role || "User"}</td>
+              <td>${createdAt}</td>
+              <td>
+                <button class="approve-btn" onclick="approveUser('${userId}')">✅ Approve</button>
+                <button class="reject-btn" onclick="rejectUser('${userId}')">❌ Reject</button>
+              </td>
+            </tr>
+          `;
+        }
+
+        tableHTML += "</tbody></table>";
+        container.innerHTML = tableHTML;
+
+        document.getElementById("prevBtn").disabled = prevSnapshots.length === 0;
+        document.getElementById("nextBtn").disabled = snapshot.size < pageSize;
+
+        if (direction === "next") {
+          prevSnapshots.push(snapshot.docs[0]);
+        }
+
+      } catch (err) {
+        console.error("🔥 Firestore error:", err);
+        container.innerHTML = `<p style="color:red">Error: ${err.message}</p>`;
+      }
+    }
+
+    window.approveUser = async function(userId, btn) {
+        try {
+            await updateDoc(doc(db, "users", userId), { requestApproved: true });
+            showToast("✅ User approved!");
+            // Remove the row from table immediately
+            btn.closest("tr").remove();
+        } catch (err) {
+            console.error("❌ Error approving user:", err);
+            showToast("Error: " + err.message);
+        }
+        };
+
+    window.rejectUser = async function(userId, btn) {
+        try {
+            await updateDoc(doc(db, "users", userId), { requestApproved: null });
+            showToast("❌ User rejected!");
+            // Remove the row from table immediately
+            btn.closest("tr").remove();
+        } catch (err) {
+            console.error("❌ Error rejecting user:", err);
+            showToast("Error: " + err.message);
+        }
+        };
+
+
+    document.getElementById("nextBtn").addEventListener("click", () => loadPendingUsers("next"));
+    document.getElementById("prevBtn").addEventListener("click", () => loadPendingUsers("prev"));
+
+    loadPendingUsers();
+  </script>
+
+  <script>
+    function showToast(message, duration = 2000) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.remove("hide");
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+        toast.classList.add("hide");
+      }, duration);
+    }
+  </script>
+</body>
+</html>
