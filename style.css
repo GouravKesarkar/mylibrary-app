@@ -131,9 +131,9 @@ header button {
 /* ======================= Book Image ======================= */
 .book-img {
   width: 100%;
-  max-height: 135px;       /* ⬅ ~25% smaller than original */
+  aspect-ratio: 2/3;      /* proportional height */
   object-fit: cover;
-  object-position: top;    
+  object-position: top;    /* show top of image */
   border-radius: 6px;
   margin-bottom: 10px;
   flex-shrink: 0;
@@ -141,38 +141,38 @@ header button {
 
 /* ======================= Book Title ======================= */
 .book-card h3 {
-  font-size: 17px;          /* bigger */
-  margin: 6px 0;
+  font-size: 15px;
+  margin: 4px 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;    
+  -webkit-line-clamp: 3;   /* max 3 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ======================= Author / Status ======================= */
+/* ======================= Author ======================= */
 .book-card p {
-  font-size: 15px;          /* bigger */
-  margin: 4px 0;
-  color: #333;              /* darker for readability */
+  font-size: 13px;
+  margin: 3px 0;
+  color: #555;
   display: -webkit-box;
-  -webkit-line-clamp: 2;    
+  -webkit-line-clamp: 2;   /* max 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex-grow: 1;             
+  flex-grow: 1;            /* pushes button to bottom */
 }
 
 /* ======================= Button ======================= */
 .book-card button {
-  margin-top: auto;         
-  padding: 7px 14px;        /* bigger */
+  margin-top: auto;        /* always at bottom */
+  padding: 5px 10px;
   background: #0077ff;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 15px;          /* bigger */
+  font-size: 13px;
 }
 
 .book-card button:disabled {
@@ -185,7 +185,7 @@ header button {
 /* Small phones/tablets: force 2 cards per row */
 @media (max-width: 600px) and (min-width: 400px) {
   #booksList {
-    grid-template-columns: 1fr 1fr; 
+    grid-template-columns: 1fr 1fr; /* 2 cards per row */
     gap: 12px;
     padding: 12px;
   }
@@ -195,34 +195,7 @@ header button {
   }
 
   .book-img {
-    max-height: 120px;  /* slightly smaller on small phones */
     margin-bottom: 8px;
-  }
-
-  .book-card h3 {
-    font-size: 15px;    /* scale down */
-  }
-
-  .book-card p {
-    font-size: 13px;    /* scale down */
-  }
-
-  .book-card button {
-    font-size: 13px;
-    padding: 6px 12px;
-  }
-}
-
-/* Extra small phones: stack 1 card per row */
-@media (max-width: 399px) {
-  #booksList {
-    grid-template-columns: 1fr; 
-    gap: 10px;
-    padding: 10px;
-  }
-
-  .book-img {
-    max-height: 110px; /* even smaller for tiny screens */
   }
 
   .book-card h3 {
@@ -235,9 +208,19 @@ header button {
 
   .book-card button {
     font-size: 12px;
-    padding: 5px 10px;
+    padding: 4px 8px;
   }
 }
+
+/* Extra small phones: stack 1 card per row */
+@media (max-width: 399px) {
+  #booksList {
+    grid-template-columns: 1fr; /* 1 card per row */
+    gap: 10px;
+    padding: 10px;
+  }
+}
+
 
 
 /* ✅ Pagination */
