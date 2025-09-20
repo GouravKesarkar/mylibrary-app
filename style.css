@@ -297,7 +297,12 @@ header button {
 
 
 /* --- Footer --- */
+/* --- Sticky Footer --- */
 footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   text-align: center;
   padding: 12px 0;
   font-size: 0.85rem;
@@ -305,6 +310,7 @@ footer {
   background: #fff4e6;
   border-top: 1px solid #e0c8b0;
   box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+  z-index: 1000; /* stays above content */
 }
 
 footer p {
