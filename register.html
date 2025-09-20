@@ -75,14 +75,19 @@
         await setDoc(doc(db, "users", user.uid), {
         name,
         email,
-        role: "user",
+        role: "customer",
         requestApproved: false,
         createdAt: serverTimestamp()
         });
 
-        // ✅ Success message and redirect
+        // ✅ Success message and delayed redirect
         showToast("✅ Registration successful! Wait for approval.");
+
+        // wait 7 seconds before redirecting
+        setTimeout(() => {
         window.location.href = "index.html";
+        }, 7000);
+
 
     } catch (error) {
         // ✅ Check if email already exists
