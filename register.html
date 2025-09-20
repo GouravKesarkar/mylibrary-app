@@ -83,8 +83,10 @@
         // ✅ Success message and delayed redirect
         errorMsg.textContent = "✅ Registration successful! Wait for approval.";
 
-        // wait 7 seconds before redirecting
-        window.location.href = "index.html";
+        // wait 5 seconds before redirecting
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 5000);
 
 
     } catch (error) {
