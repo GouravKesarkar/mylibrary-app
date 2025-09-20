@@ -38,6 +38,8 @@
     <button onclick="loadRequests(true)">Next ➡</button>
   </div>
 
+  <div id="toast"></div>
+
   <footer>
     <p>© 2025 Meera's Book Collection </p>
     <a href="https://wa.me/?text=📚%20Check%20out%20this%20Mythology%20Stories%20App!%20Install%20it%20here:%20https://mythology-stories.netlify.app/"
@@ -127,7 +129,7 @@
     window.approveRequest = async function(bookingId) {
       await updateDoc(doc(db, "bookings", bookingId), { status: "approved",issuedAt: serverTimestamp() });
 
-      alert("✅ Request approved!");
+      showToast("✅ Request approved!");
       loadRequests();
     }
 
@@ -141,11 +143,11 @@
         isAvailable: true
       });
 
-      alert("❌ Request rejected and book marked available again!");
+      showToast("❌ Request rejected and book marked available again!");
       loadRequests();
     } catch (err) {
       console.error("🔥 Error rejecting request:", err);
-      alert("Error: " + err.message);
+      showToast("Error: " + err.message);
     }
   };
 
@@ -158,6 +160,19 @@
     });
 
     loadRequests();
+  </script>
+  <script>
+    function showToast(message, duration = 2000) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.remove("hide");
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+        toast.classList.add("hide");
+      }, duration);
+    }
   </script>
 </body>
 </html>

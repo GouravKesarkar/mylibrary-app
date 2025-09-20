@@ -79,6 +79,8 @@
     <button id="nextBtn" disabled>Next ➡</button>
   </div>
 
+  <div id="toast"></div>
+
   <footer>
     <p>© 2025 Meera's Book Collection </p>
     <a href="https://wa.me/?text=📚%20Check%20out%20this%20Mythology%20Stories%20App!%20Install%20it%20here:%20https://mythology-stories.netlify.app/"
@@ -224,11 +226,11 @@
           isAvailable: true
         });
 
-        alert("✅ Book returned successfully!");
+        showToast("✅ Book returned successfully!");
         loadIssuedBooks(); // refresh the list
       } catch (err) {
         console.error("❌ Error returning book:", err);
-        alert("Error: " + err.message);
+        showToast("Error: " + err.message);
       }
     };
 
@@ -236,6 +238,19 @@
     document.getElementById("prevBtn").addEventListener("click", () => loadIssuedBooks("prev"));
 
     loadIssuedBooks();
+  </script>
+  <script>
+    function showToast(message, duration = 2000) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.remove("hide");
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+        toast.classList.add("hide");
+      }, duration);
+    }
   </script>
 </body>
 </html>
