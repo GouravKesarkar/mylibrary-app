@@ -100,6 +100,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, deleteUser } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { getFirestore, collection, query, where, orderBy, getDocs, doc, updateDoc, limit, startAfter } 
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
@@ -222,15 +223,19 @@
     };
 
     window.rejectUser = async function(userId, btn) {
-      try {
-        await updateDoc(doc(db, "users", userId), { requestApproved: null });
-        toast("❌ User rejected!");
-        btn.closest("tr").remove();
-      } catch (err) {
-        console.error("❌ Error rejecting user:", err);
-        toast("Error: " + err.message);
-      }
+        try {
+            // 1️⃣ Delete Firestore document
+            await updateDoc(doc(db, "users", userId), { requestApproved: null });
+            // 2️⃣ Remove row visually
+            btn.closest("tr").remove();
+            toast("❌ User rejected!");
+            setTimeout(() => loadPendingUsers(), 500);
+        } catch (err) {
+            console.error("❌ Error rejecting user:", err);
+            showToast("Error: " + err.message);
+        }
     };
+
 
     document.getElementById("nextBtn").addEventListener("click", () => loadPendingUsers("next"));
     document.getElementById("prevBtn").addEventListener("click", () => loadPendingUsers("prev"));
