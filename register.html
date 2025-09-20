@@ -84,15 +84,12 @@
         alert("✅ Registration successful! Wait for approval.");
 
         // wait 7 seconds before redirecting
-        setTimeout(() => {
         window.location.href = "index.html";
-        }, 7000);
 
 
     } catch (error) {
         // ✅ Check if email already exists
         if (error.code === "auth/email-already-in-use") {
-        showToast("⚠️ This email is already registered. Try logging in.");
         errorMsg.textContent = "⚠️ This email is already registered. Try logging in.";
         } else {
         errorMsg.textContent = "❌ " + error.message;
