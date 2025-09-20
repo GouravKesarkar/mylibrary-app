@@ -58,6 +58,7 @@
       const bookingsQuery = query(
         collection(db, "bookings"),
         where("userId", "==", user.uid),
+        where("status", "in", ["booked", "approved"]),
         // optionally order by bookedAt descending
       );
 
