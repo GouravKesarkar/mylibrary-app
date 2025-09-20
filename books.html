@@ -89,26 +89,70 @@
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "";
 
-      snapshot.forEach((docSnap, index) => {
+      const user = auth.currentUser;
+
+      for (let index = 0; index < snapshot.docs.length; index++) {
+        const docSnap = snapshot.docs[index];
         const book = docSnap.data();
-        const available = book.isAvailable === true;
+        const bookId = docSnap.id;
+        let buttonHtml = "";
+
+        if (book.isAvailable === true) {
+          buttonHtml = `<button onclick="bookNow('${bookId}')">Book Now</button>`;
+        } else if (user) {
+          // check if this user has booked this book
+          const userBookingQuery = query(
+            collection(db, "bookings"),
+            where("userId", "==", user.uid),
+            where("bookId", "==", bookId),
+            where("status", "==", "booked")
+          );
+          const userBookingSnapshot = await getDocs(userBookingQuery);
+
+          if (!userBookingSnapshot.empty) {
+            buttonHtml = `<button onclick="cancelBooking('${bookId}', '${userBookingSnapshot.docs[0].id}')">Cancel Booking</button>`;
+          } else {
+            buttonHtml = `<button disabled>Not Available</button>`;
+          }
+        } else {
+          buttonHtml = `<button disabled>Not Available</button>`;
+        }
+
         const card = document.createElement("div");
         card.className = "book-card";
         card.innerHTML = `
           <img src="${book.picture || 'default-book.png'}" class="book-img" alt="Book">
           <h3>${book.name}</h3>
           <p>👤 ${book.author}</p>
-          <p>Status: ${available ? "✅ Available" : "❌ Taken"}</p>
-          <button ${available ? `onclick="bookNow('${docSnap.id}')"` : "disabled"}>
-            ${available ? "Book Now" : "Not Available"}
-          </button>
+          <p>Status: ${book.isAvailable ? "✅ Available" : "❌ Taken"}</p>
+          ${buttonHtml}
         `;
         booksList.appendChild(card);
 
         if (index === 0) firstVisible = docSnap;
         if (index === snapshot.docs.length - 1) lastVisible = docSnap;
-      });
+      }
     }
+
+    // 🚀 Cancel booking function
+    window.cancelBooking = async function (bookId, bookingId) {
+      try {
+        // 1️⃣ Mark book as available
+        const bookRef = doc(db, "books", bookId);
+        await updateDoc(bookRef, { isAvailable: true });
+
+        // 2️⃣ Delete or update booking
+        await updateDoc(doc(db, "bookings", bookingId), { status: "cancelled" });
+        // (optional: use deleteDoc if you prefer removing completely)
+
+        showToast("✅ Booking cancelled!");
+        loadBooks(true);
+      } catch (err) {
+        console.error(err);
+        showToast("❌ Error cancelling booking: " + err.message);
+      }
+    };
+
 
     document.getElementById("searchBtn").addEventListener("click", () => {
       searchQuery = document.getElementById("searchInput").value.trim();
