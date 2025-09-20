@@ -332,3 +332,30 @@ footer p {
 .share-btn:hover {
   background: #1da851;
 }
+
+/* Toast Notification */
+#toast {
+  position: fixed;
+  top: 20px;                 /* top center */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #0077ff;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;       /* allows clicks through it */
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+#toast.hide {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-20px);
+}

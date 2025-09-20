@@ -37,6 +37,8 @@
     <button onclick="loadBooks(true)">Next ➡</button>
   </div>
 
+  <div id="toast"></div>
+
   <footer>
     <p>© 2025 Meera's Book Collection </p>
     <a href="https://wa.me/?text=📚%20Check%20out%20this%20Mythology%20Stories%20App!%20Install%20it%20here:%20https://mythology-stories.netlify.app/"
@@ -120,7 +122,7 @@
     try {
       const user = auth.currentUser;
       if (!user) { 
-        alert("Please log in first!"); 
+        showToast("Please log in first!"); 
         return; 
       }
 
@@ -133,7 +135,7 @@
       const userBookingSnapshot = await getDocs(userBookingQuery);
 
       if (!userBookingSnapshot.empty) {
-        alert("❌ You already have a book booked. Return it before booking a new one.");
+        showToast("❌ You already have a book booked. Return it before booking a new one.");
         return;
       }
 
@@ -143,7 +145,7 @@
       const bookData = bookSnap.data();
 
       if (!bookData || bookData.isAvailable === false) {
-        alert("❌ Book is already taken!");
+        showToast("❌ Book is already taken!");
         loadBooks(true);
         return;
       }
@@ -160,17 +162,30 @@
     // 4️⃣ Update book availability
     await updateDoc(bookRef, { isAvailable: false });
 
-    alert("✅ Book successfully reserved!");
+    showToast("✅ Book successfully reserved!");
     loadBooks(true);
     
   } catch (err) {
     console.error(err);
-    alert("❌ Error booking book: " + err.message);
+    showToast("❌ Error booking book: " + err.message);
   }
 }
 
 
     loadBooks(true);
+  </script>
+  <script>
+    function showToast(message, duration = 2000) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.remove("hide");
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+        toast.classList.add("hide");
+      }, duration);
+    }
   </script>
 </body>
 </html>
