@@ -20,8 +20,6 @@
   </script>
 
   <style>
-
-    /* Add this inside <style> */
     main {
       max-width: 900px;  /* matches your books-with-users page look */
       margin: 0 auto;    /* centers the content */
@@ -32,11 +30,14 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 15px;
+      table-layout: fixed; /* force fixed column widths */
     }
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
+      word-wrap: break-word;
+      white-space: normal;
     }
     th {
       background: #0077ff;
@@ -83,6 +84,16 @@
       background: #ccc;
       cursor: not-allowed;
     }
+
+    /* Fix name column */
+    td.name-col, th.name-col {
+      max-width: 180px;
+    }
+
+    /* Fix email column */
+    td.email-col, th.email-col {
+      max-width: 250px;
+    }
   </style>
 </head>
 <body>
@@ -99,13 +110,13 @@
       <button id="nextBtn" disabled>Next ➡</button>
     </div>
 
-  <div id="toast"></div>
+    <div id="toast"></div>
 
-  <footer>
-    <p>📚 Meera’s Library of Stories </p>
-  </footer>
-
+    <footer>
+      <p>📚 Meera’s Library of Stories </p>
+    </footer>
   </main>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, deleteUser } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
@@ -176,8 +187,8 @@
           <table>
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Email</th>
+                <th class="name-col">Name</th>
+                <th class="email-col">Email</th>
                 <th>Role</th>
                 <th>Request Time</th>
                 <th>Action</th>
@@ -193,8 +204,8 @@
 
           tableHTML += `
             <tr>
-              <td>${user.name || "N/A"}</td>
-              <td>${user.email}</td>
+              <td class="name-col">${user.name || "N/A"}</td>
+              <td class="email-col">${user.email}</td>
               <td>${user.role || "User"}</td>
               <td>${createdAt}</td>
               <td>
@@ -231,18 +242,15 @@
     };
 
     window.rejectUser = async function(userId, btn) {
-        try {
-            // 1️⃣ Delete Firestore document
-            await updateDoc(doc(db, "users", userId), { requestApproved: null });
-            // 2️⃣ Remove row visually
-            btn.closest("tr").remove();
-            setTimeout(() => loadPendingUsers(), 500);
-        } catch (err) {
-            console.error("❌ Error rejecting user:", err);
-            showToast("Error: " + err.message);
-        }
+      try {
+        await updateDoc(doc(db, "users", userId), { requestApproved: null });
+        btn.closest("tr").remove();
+        setTimeout(() => loadPendingUsers(), 500);
+      } catch (err) {
+        console.error("❌ Error rejecting user:", err);
+        showToast("Error: " + err.message);
+      }
     };
-
 
     document.getElementById("nextBtn").addEventListener("click", () => loadPendingUsers("next"));
     document.getElementById("prevBtn").addEventListener("click", () => loadPendingUsers("prev"));
