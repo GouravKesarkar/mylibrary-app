@@ -178,7 +178,7 @@
       const userBookingSnapshot = await getDocs(userBookingQuery);
 
       if (!userBookingSnapshot.empty) {
-        showToast("❌ You already have a book booked. Return it before booking a new one.");
+        showToast("❌ You already have a book booked. Cancel or Return it before booking a new one.");
         return;
       }
 
