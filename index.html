@@ -18,6 +18,11 @@
     <button id="loginBtn">Login</button>
     <p id="error-msg"></p>
   </div>
+  <p class="register-text">
+    New user? 
+    <a href="register.html">Register here</a>
+  </p>
+  
 
 
   <footer>
@@ -97,7 +102,7 @@
   <!-- ✅ Service Worker Registration -->
   <script>
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js")
+      navigator.serviceWorker.register("./service-worker.js")
         .then(() => console.log("✅ Service Worker registered"))
         .catch(err => console.log("❌ SW registration failed", err));
     }

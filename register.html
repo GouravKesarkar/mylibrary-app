@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyLibrary - Register</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0077ff">
+</head>
+<body>
+  <div class="login-container">
+    <h2>📚 MyLibrary Register</h2>
+
+    <input type="text" id="name" placeholder="Enter Name" required>
+    <input type="email" id="email" placeholder="Enter Email" required>
+    <input type="password" id="password" placeholder="Enter Password" required>
+    <button id="registerBtn">Register</button>
+    <p id="error-msg"></p>
+
+    <p class="register-text">
+      Already have an account? 
+      <a href="index.html">Login here</a>
+    </p>
+  </div>
+
+  <div id="toast"></div>
+
+  <footer>
+    <p>© 2025 Meera's Book Collection </p>
+    <a href="https://wa.me/?text=📚%20Check%20out%20this%20Mythology%20Stories%20App!%20Install%20it%20here:%20https://mythology-stories.netlify.app/"
+      class="share-btn" target="_blank" rel="noopener">📤 Share via WhatsApp</a>
+  </footer>
+
+  <!-- Firebase Scripts -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
+      authDomain: "mylibrary-app-5c57e.firebaseapp.com",
+      projectId: "mylibrary-app-5c57e",
+      storageBucket: "mylibrary-app-5c57e.firebasestorage.app",
+      messagingSenderId: "1017511803180",
+      appId: "1:1017511803180:web:5ccf3062e338c7a6985489"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    document.getElementById("registerBtn").addEventListener("click", async () => {
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const errorMsg = document.getElementById("error-msg");
+
+    if (!name || !email || !password) {
+        errorMsg.textContent = "⚠️ All fields are required!";
+        return;
+    }
+
+    try {
+        // ✅ Create user in Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // ✅ Save extra info in Firestore
+        await setDoc(doc(db, "users", user.uid), {
+        name,
+        email,
+        role: "user",
+        requestApproved: false,
+        createdAt: serverTimestamp()
+        });
+
+        // ✅ Success message and redirect
+        showToast("✅ Registration successful! Wait for approval.");
+        window.location.href = "index.html";
+
+    } catch (error) {
+        // ✅ Check if email already exists
+        if (error.code === "auth/email-already-in-use") {
+        showToast("⚠️ This email is already registered. Try logging in.");
+        errorMsg.textContent = "⚠️ This email is already registered. Try logging in.";
+        } else {
+        errorMsg.textContent = "❌ " + error.message;
+        }
+    }
+    });
+
+  </script>
+
+  <!-- ✅ Service Worker Registration -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./service-worker.js")
+        .then(() => console.log("✅ Service Worker registered"))
+        .catch(err => console.log("❌ SW registration failed", err));
+    }
+    function showToast(message, duration = 2000) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.remove("hide");
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+        toast.classList.add("hide");
+      }, duration);
+    }
+  </script>
+</body>
+</html>
