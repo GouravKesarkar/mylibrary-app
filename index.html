@@ -64,12 +64,22 @@
       if (user) {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
-          localStorage.setItem("userRole", userDoc.data().role);
-          localStorage.setItem("userEmail", user.email);
-          window.location.href = "home.html";
+          const userData = userDoc.data();
+
+          // Only redirect if requestApproved is true
+          if (userData.requestApproved) {
+            localStorage.setItem("userRole", userData.role);
+            localStorage.setItem("userEmail", user.email);
+            window.location.href = "home.html";
+          } else {
+            // Not approved yet — sign out and show message
+            await auth.signOut();
+            alert("❌ Your registration is pending approval. Please wait.");
+          }
         }
       }
     });
+
 
     // ✅ Login Button  
     document.getElementById("loginBtn").addEventListener("click", async () => {
