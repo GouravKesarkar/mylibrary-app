@@ -95,9 +95,12 @@
         // 3️⃣ Check if requestApproved is true
         if (!userData.requestApproved) {
           errorMsg.textContent = "❌ Your registration is pending approval. Please wait.";
+          // wait 3 seconds before signing out and returning
+          await new Promise(resolve => setTimeout(resolve, 3000));
           await auth.signOut(); // sign out user from Auth
           return;
         }
+
 
         // 4️⃣ Store role and email in localStorage
         localStorage.setItem("userRole", userData.role);
