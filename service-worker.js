@@ -9,6 +9,8 @@ const ASSETS = [
   "/approve-books.html",
   "/books-with-user.html",
   "/add-books.html",
+  "/register.html",
+  "/userrequest-approve.html",
   "/style.css",
   "/manifest.json",
   "/icon/mylibrary-icon-192.png"
