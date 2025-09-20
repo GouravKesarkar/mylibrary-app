@@ -68,8 +68,9 @@
       // Fetch role from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
+        const userData = userDoc.data();  // <-- contains your stored fields: name, role, etc.
         const role = userDoc.data().role;
-        welcomeMsg.textContent = `👋 Hello, ${user.name}`;
+        welcomeMsg.textContent = `👋 Hello, ${userData.name}`;
 
         if (role === "customer") {
           myBooksBtn.style.display = "block";
