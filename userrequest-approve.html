@@ -20,6 +20,14 @@
   </script>
 
   <style>
+
+    /* Add this inside <style> */
+    main {
+      max-width: 900px;  /* matches your books-with-users page look */
+      margin: 0 auto;    /* centers the content */
+      padding: 0 10px;   /* prevents sticking to the edges */
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -83,12 +91,13 @@
     <button onclick="window.location.href='home.html'">⬅ Back</button>
   </header>
 
-  <div id="usersTableContainer">⏳ Loading...</div>
-
-  <div class="pagination">
-    <button id="prevBtn" disabled>⬅ Prev</button>
-    <button id="nextBtn" disabled>Next ➡</button>
-  </div>
+  <main>
+    <div id="usersTableContainer">⏳ Loading...</div>
+  
+    <div class="pagination">
+      <button id="prevBtn" disabled>⬅ Prev</button>
+      <button id="nextBtn" disabled>Next ➡</button>
+    </div>
 
   <div id="toast"></div>
 
@@ -96,6 +105,7 @@
     <p>📚 Meera’s Library of Stories </p>
   </footer>
 
+  </main>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getAuth, deleteUser } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
