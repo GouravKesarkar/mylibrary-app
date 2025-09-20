@@ -214,8 +214,8 @@
     window.approveUser = async function(userId, btn) {
       try {
         await updateDoc(doc(db, "users", userId), { requestApproved: true });
-        toast("✅ User approved!");
         btn.closest("tr").remove();
+        setTimeout(() => loadPendingUsers(), 500);
       } catch (err) {
         console.error("❌ Error approving user:", err);
         toast("Error: " + err.message);
@@ -228,7 +228,6 @@
             await updateDoc(doc(db, "users", userId), { requestApproved: null });
             // 2️⃣ Remove row visually
             btn.closest("tr").remove();
-            toast("❌ User rejected!");
             setTimeout(() => loadPendingUsers(), 500);
         } catch (err) {
             console.error("❌ Error rejecting user:", err);
