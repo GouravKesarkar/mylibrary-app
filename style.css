@@ -394,3 +394,53 @@ footer p {
   text-decoration: underline;
 }
 
+/* library-summary  */
+.library-summary {
+  margin: 30px auto;
+  padding: 20px 15px;
+  max-width: 650px;
+  text-align: center;
+  background: #f4faff;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+  font-family: Arial, sans-serif;
+  transition: transform 0.3s ease;
+}
+
+.library-summary:hover {
+  transform: translateY(-3px); /* subtle lift on hover */
+}
+
+.library-summary h3 {
+  color: #0077ff;
+  margin-bottom: 12px;
+  font-size: 1.5rem;
+}
+
+.library-summary p {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+
+.library-summary .tagline {
+  font-weight: bold;
+  color: #333;
+  margin-top: 12px;
+  transition: opacity 0.8s ease;
+}
+
+/* Responsive tweaks */
+@media (max-width: 480px) {
+  .library-summary {
+    padding: 18px 12px;
+  }
+
+  .library-summary h3 {
+    font-size: 1.3rem;
+  }
+
+  .library-summary p {
+    font-size: 14px;
+  }
+}

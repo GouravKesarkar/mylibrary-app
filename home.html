@@ -22,6 +22,17 @@
 
     <button id="logoutBtn" class="section-btn logout-btn">🚪 Logout</button>
   </div>
+  
+  <section class="library-summary">
+    <h3>✨ Welcome to Meera’s Library of Stories!</h3>
+    <p>
+      Dive into a world of adventures, mysteries, and magical tales.  
+      Search your favorite books, reserve them with a tap, and enjoy reading like never before.  
+      Because every story here is waiting for <b>you</b> to bring it to life! 🚀📖
+    </p>
+    <p class="tagline" id="tagline">🌟 "Where every page starts a new adventure!" 🌟</p>
+  </section>
+  
 
   <footer>
     <p>📚 Meera’s Library of Stories </p>
@@ -109,5 +120,27 @@
         .catch(err => console.log("❌ SW registration failed", err));
     }
   </script>
+
+  <script>
+    const taglines = [
+      '🌟 "Where every page starts a new adventure!" 🌟',
+      '📖 "Pick a book, spark your imagination!" 🔥',
+      '✨ "Stories waiting just for you!" ✨',
+      '🚀 "Read, explore, and dream big!" 🚀'
+    ];
+
+    let index = 0;
+    const taglineEl = document.getElementById("tagline");
+
+    setInterval(() => {
+      index = (index + 1) % taglines.length;
+      taglineEl.style.opacity = 0;
+      setTimeout(() => {
+        taglineEl.textContent = taglines[index];
+        taglineEl.style.opacity = 1;
+      }, 800); // match transition time
+    }, 4000); // change every 4 seconds
+  </script>
+
 </body>
 </html>
