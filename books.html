@@ -66,61 +66,42 @@
     const auth = getAuth();
     const db = getFirestore(app);
 
-    let pageStack = [];   // stores cursors
-    let currentPage = 0;  // current page index
-    let searchQuery = "";
+    let currentPage = 1;
+    let pageSize = 10;
+    let hasNextPage = false;
+    let totalBooks = 0;
+    let totalPages = 0;
 
-    async function loadBooks(pageDirection = 0) {
-      let q;
-      if (searchQuery) {
-        q = query(
-          collection(db, "books"),
-          where("searchIndex", "array-contains", searchQuery.toLowerCase()),
-          orderBy("name"),
-          limit(10)
-        );
-      } else {
-        q = query(collection(db, "books"), orderBy("name"), limit(10));
+    async function getTotalBooks() {
+      const snapshot = await getDocs(collection(db, "books"));
+      totalBooks = snapshot.size;
+      totalPages = Math.ceil(totalBooks / pageSize);
+    }
+
+    async function loadBooks(page = 1) {
+      // ensure we know total books first
+      if (totalBooks === 0) {
+        await getTotalBooks();
       }
 
-      // ⬅ Prev
-      if (pageDirection === -1 && currentPage > 0) {
-        currentPage--;
-        const prevCursor = pageStack[currentPage - 1];
-        if (prevCursor) {
-          q = query(q, startAfter(prevCursor));
-        }
-      }
+      let q = query(collection(db, "books"), orderBy("name"), limit(pageSize));
 
-      // ➡ Next
-      if (pageDirection === 1) {
-        const lastCursor = pageStack[currentPage];
-        if (lastCursor) {
-          q = query(q, startAfter(lastCursor));
-        }
-        currentPage++;
+      if (page > 1 && lastVisible) {
+        q = query(collection(db, "books"), orderBy("name"), startAfter(lastVisible), limit(pageSize));
       }
 
       const snapshot = await getDocs(q);
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "";
 
-      if (snapshot.empty) {
-        booksList.innerHTML = "<p>No more books.</p>";
-        document.getElementById("nextBtn").disabled = true;
-        return;
+      if (!snapshot.empty) {
+        firstVisible = snapshot.docs[0];
+        lastVisible = snapshot.docs[snapshot.docs.length - 1];
       }
 
-      const user = auth.currentUser;
-
-      snapshot.docs.forEach((docSnap, index) => {
+      snapshot.forEach(docSnap => {
         const book = docSnap.data();
         const bookId = docSnap.id;
-
-        let buttonHtml = book.isAvailable
-          ? `<button onclick="bookNow('${bookId}')">Book Now</button>`
-          : `<button disabled>Not Available</button>`;
-
         const card = document.createElement("div");
         card.className = "book-card";
         card.innerHTML = `
@@ -128,39 +109,41 @@
           <h3>${book.name}</h3>
           <p>👤 ${book.author}</p>
           <p>Status: ${book.isAvailable ? "✅ Available" : "❌ Taken"}</p>
-          ${buttonHtml}
         `;
         booksList.appendChild(card);
-
-        if (index === snapshot.docs.length - 1) {
-          pageStack[currentPage] = docSnap; // store cursor
-        }
       });
 
-      // disable buttons when needed
-      document.getElementById("prevBtn").disabled = currentPage === 0;
-      document.getElementById("nextBtn").disabled = snapshot.docs.length < 10;
-
-      // render page numbers
-      renderPageNumbers();
+      hasNextPage = snapshot.docs.length === pageSize && page < totalPages;
+      renderPagination();
     }
 
-    function renderPageNumbers() {
-      const pageNumbersDiv = document.getElementById("pageNumbers");
-      pageNumbersDiv.innerHTML = "";
+    function renderPagination() {
+      const pageNumbers = document.getElementById("pageNumbers");
+      pageNumbers.innerHTML = "";
 
-      for (let i = 0; i <= pageStack.length; i++) {
-        const btn = document.createElement("button");
-        btn.textContent = i + 1;
-        btn.onclick = () => goToPage(i);
-        if (i === currentPage) {
-          btn.style.fontWeight = "bold";
-          btn.style.background = "#0077ff";
-          btn.style.color = "white";
-        }
-        pageNumbersDiv.appendChild(btn);
+      for (let i = 1; i <= totalPages; i++) {
+        const span = document.createElement("span");
+        span.textContent = i;
+        if (i === currentPage) span.classList.add("active");
+        span.onclick = () => {
+          currentPage = i;
+          loadBooks(currentPage);
+        };
+        pageNumbers.appendChild(span);
       }
+
+      document.getElementById("prevBtn").disabled = currentPage === 1;
+      document.getElementById("nextBtn").disabled = !hasNextPage;
     }
+
+    function changePage(step) {
+      currentPage += step;
+      loadBooks(currentPage);
+    }
+
+    // 🚀 Start
+    getTotalBooks().then(() => loadBooks());
+
 
     async function goToPage(pageIndex) {
       if (pageIndex === currentPage) return;
