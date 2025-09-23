@@ -348,7 +348,7 @@ footer p {
   font-size: 14px;
   z-index: 10000;
   opacity: 0;
-  /*pointer-events: none;       /* allows clicks through it */
+  pointer-events: none;       /* allows clicks through it */
   transition: opacity 0.7s ease, transform 0.7s ease;
 }
 #toast.show {
@@ -358,22 +358,6 @@ footer p {
 #toast.hide {
   opacity: 0;
   transform: translateX(-50%) translateY(-20px);
-}
-
-#toast button {
-  background: #fff;
-  color: #0077ff;
-  font-size: 13px;
-  font-weight: bold;
-  margin-left: 10px;
-  padding: 3px 10px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-#toast button:hover {
-  background: #e6e6e6;
 }
 
 /* Register  */

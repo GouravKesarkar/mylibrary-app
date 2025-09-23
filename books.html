@@ -222,43 +222,17 @@
     loadBooks(true);
   </script>
   <script>
-    function showToast(message) {
-      const toast = document.getElementById("toast");
+      function showToast(message, duration = 5000) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.remove("hide");
+        toast.classList.add("show");
 
-      // Clear old content
-      toast.innerHTML = "";
-
-      // Create message text
-      const msg = document.createElement("span");
-      msg.textContent = message;
-
-      // Create OK button
-      const btn = document.createElement("button");
-      btn.textContent = "OK";
-      btn.style.marginLeft = "12px";
-      btn.style.padding = "4px 10px";
-      btn.style.border = "none";
-      btn.style.borderRadius = "6px";
-      btn.style.backgroundColor = "#fff";
-      btn.style.color = "#0077ff";
-      btn.style.fontWeight = "bold";
-      btn.style.cursor = "pointer";
-
-      btn.onclick = () => {
-        toast.classList.remove("show");
-        toast.classList.add("hide");
-        toast.innerHTML = "";
-      };
-
-      // Add to toast
-      toast.appendChild(msg);
-      toast.appendChild(btn);
-
-      // Show
-      toast.classList.remove("hide");
-      toast.classList.add("show");
-    }
-
+        setTimeout(() => {
+          toast.classList.remove("show");
+          toast.classList.add("hide");
+        }, duration);
+      }
   </script>
 </body>
 </html>
