@@ -146,6 +146,8 @@
         // (optional: use deleteDoc if you prefer removing completely)
 
         showToast("✅ Booking cancelled!");
+        firstVisible = null;
+        lastVisible = null;
         loadBooks(true);
       } catch (err) {
         console.error(err);
@@ -206,6 +208,8 @@
     await updateDoc(bookRef, { isAvailable: false });
 
     showToast("✅ Book successfully reserved!");
+    firstVisible = null;
+    lastVisible = null;
     loadBooks(true);
     
   } catch (err) {
@@ -218,17 +222,43 @@
     loadBooks(true);
   </script>
   <script>
-    function showToast(message, duration = 2000) {
+    function showToast(message) {
       const toast = document.getElementById("toast");
-      toast.textContent = message;
-      toast.classList.remove("hide");
-      toast.classList.add("show");
 
-      setTimeout(() => {
+      // Clear old content
+      toast.innerHTML = "";
+
+      // Create message text
+      const msg = document.createElement("span");
+      msg.textContent = message;
+
+      // Create OK button
+      const btn = document.createElement("button");
+      btn.textContent = "OK";
+      btn.style.marginLeft = "12px";
+      btn.style.padding = "4px 10px";
+      btn.style.border = "none";
+      btn.style.borderRadius = "6px";
+      btn.style.backgroundColor = "#fff";
+      btn.style.color = "#0077ff";
+      btn.style.fontWeight = "bold";
+      btn.style.cursor = "pointer";
+
+      btn.onclick = () => {
         toast.classList.remove("show");
         toast.classList.add("hide");
-      }, duration);
+        toast.innerHTML = "";
+      };
+
+      // Add to toast
+      toast.appendChild(msg);
+      toast.appendChild(btn);
+
+      // Show
+      toast.classList.remove("hide");
+      toast.classList.add("show");
     }
+
   </script>
 </body>
 </html>
