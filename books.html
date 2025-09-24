@@ -32,12 +32,12 @@
 
   <div id="booksList"></div>
 
+  <!-- Pagination -->
   <div id="pagination">
     <button id="prevBtn" onclick="changePage(-1)">⬅ Prev</button>
     <span id="pageNumbers"></span>
     <button id="nextBtn" onclick="changePage(1)">Next ➡</button>
   </div>
-  
 
   <div id="toast"></div>
 
@@ -51,7 +51,7 @@
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import {
       getFirestore, collection, doc, query, where, orderBy,
-      limit, startAfter, endBefore, getDocs, addDoc, updateDoc, getDoc, serverTimestamp
+      limit, startAfter, getDocs, addDoc, updateDoc, getDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     
     const firebaseConfig = {
@@ -70,17 +70,15 @@
     let pageSize = 10;
     let lastVisible = null;
     let firstVisible = null;
-    let prevStack = []; // keep track of previous pages
-    
+    let prevStack = [];
+
     async function loadBooks(next = true) {
       let q = query(collection(db, "books"), orderBy("name"), limit(pageSize));
     
       if (next && lastVisible) {
-        // going forward
         q = query(collection(db, "books"), orderBy("name"), startAfter(lastVisible), limit(pageSize));
       } else if (!next && prevStack.length > 1) {
-        // going back
-        prevStack.pop(); // remove current page
+        prevStack.pop();
         const prevCursor = prevStack[prevStack.length - 1];
         q = query(collection(db, "books"), orderBy("name"), startAfter(prevCursor), limit(pageSize));
       }
@@ -92,13 +90,36 @@
       if (!snapshot.empty) {
         firstVisible = snapshot.docs[0];
         lastVisible = snapshot.docs[snapshot.docs.length - 1];
-    
-        // keep track of cursor history
         if (next) prevStack.push(firstVisible);
+
+        const user = auth.currentUser;
     
-        snapshot.forEach(docSnap => {
+        for (let docSnap of snapshot.docs) {
           const book = docSnap.data();
           const bookId = docSnap.id;
+          let buttonHtml = "";
+
+          if (book.isAvailable) {
+            buttonHtml = `<button onclick="bookNow('${bookId}')">Book Now</button>`;
+          } else if (user) {
+            // check if this user booked it
+            const userBookingQuery = query(
+              collection(db, "bookings"),
+              where("userId", "==", user.uid),
+              where("bookId", "==", bookId),
+              where("status", "==", "booked")
+            );
+            const userBookingSnapshot = await getDocs(userBookingQuery);
+
+            if (!userBookingSnapshot.empty) {
+              buttonHtml = `<button onclick="cancelBooking('${bookId}', '${userBookingSnapshot.docs[0].id}')">Cancel Booking</button>`;
+            } else {
+              buttonHtml = `<button disabled>Not Available</button>`;
+            }
+          } else {
+            buttonHtml = `<button disabled>Not Available</button>`;
+          }
+
           const card = document.createElement("div");
           card.className = "book-card";
           card.innerHTML = `
@@ -106,14 +127,11 @@
             <h3>${book.name}</h3>
             <p>👤 ${book.author}</p>
             <p>Status: ${book.isAvailable ? "✅ Available" : "❌ Taken"}</p>
-            <button ${book.isAvailable ? `onclick="bookNow('${bookId}')"` : "disabled"}>
-              ${book.isAvailable ? "Book Now" : "Not Available"}
-            </button>
+            ${buttonHtml}
           `;
           booksList.appendChild(card);
-        });
+        }
     
-        // update buttons
         document.getElementById("prevBtn").disabled = prevStack.length <= 1;
         document.getElementById("nextBtn").disabled = snapshot.docs.length < pageSize;
       }
@@ -133,7 +151,7 @@
         const userBookingSnapshot = await getDocs(userBookingQuery);
     
         if (!userBookingSnapshot.empty) {
-          showToast("❌ You already have a book booked.");
+          showToast("❌ You already have a book booked. Cancel or Return it before booking a new one.");
           return;
         }
     
@@ -157,7 +175,7 @@
     
         await updateDoc(bookRef, { isAvailable: false });
     
-        showToast("✅ Book successfully reserved!");
+        showToast("✅ Book successfully reserved. Kindly collect.");
         prevStack = [];
         lastVisible = null;
         loadBooks(true);
@@ -166,18 +184,32 @@
         showToast("❌ Error booking book: " + err.message);
       }
     };
+
+    // 🚀 Cancel booking
+    window.cancelBooking = async function(bookId, bookingId) {
+      try {
+        const bookRef = doc(db, "books", bookId);
+        await updateDoc(bookRef, { isAvailable: true });
+        await updateDoc(doc(db, "bookings", bookingId), { status: "cancelled" });
+        showToast("✅ Booking cancelled!");
+        prevStack = [];
+        lastVisible = null;
+        loadBooks(true);
+      } catch (err) {
+        console.error(err);
+        showToast("❌ Error cancelling booking: " + err.message);
+      }
+    };
     
     // 🚀 Start
     loadBooks(true);
     
-    // expose pagination to buttons
     window.changePage = function(step) {
       if (step === 1) loadBooks(true);
       if (step === -1) loadBooks(false);
     };
   </script>
     
-
   <script>
     function showToast(message, duration = 5000) {
       const toast = document.getElementById("toast");
