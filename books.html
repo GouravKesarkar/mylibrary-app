@@ -67,75 +67,87 @@
     const auth = getAuth();
     const db = getFirestore(app);
     
-    let pageSize = 10;
     let lastVisible = null;
     let firstVisible = null;
-    let prevStack = [];
+    let searchQuery = "";
+    let prevStack = [];        // 🔥 keep track of previous pages
+    const pageSize = 10;       // 🔥 how many books per page
 
-    async function loadBooks(next = true) {
-      let q = query(collection(db, "books"), orderBy("name"), limit(pageSize));
-    
-      if (next && lastVisible) {
-        q = query(collection(db, "books"), orderBy("name"), startAfter(lastVisible), limit(pageSize));
-      } else if (!next && prevStack.length > 1) {
-        prevStack.pop();
-        const prevCursor = prevStack[prevStack.length - 1];
-        q = query(collection(db, "books"), orderBy("name"), startAfter(prevCursor), limit(pageSize));
+    async function loadBooks(nextPage = true) {
+      let q;
+      if (searchQuery) {
+        q = query(
+          collection(db, "books"),
+          where("searchIndex", "array-contains", searchQuery.toLowerCase()),
+          orderBy("name"),
+          limit(pageSize)
+        );
+      } else {
+        q = query(collection(db, "books"), orderBy("name"), limit(pageSize));
       }
-    
+
+      // 🔥 handle next/prev
+      if (nextPage && lastVisible) {
+        q = query(q, startAfter(lastVisible));
+        prevStack.push(lastVisible);   // push current page marker
+      }
+      if (!nextPage && prevStack.length > 0) {
+        const prevDoc = prevStack.pop();  // go back
+        q = query(q, startAt(prevDoc));
+      }
+
       const snapshot = await getDocs(q);
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "";
-    
-      if (!snapshot.empty) {
-        firstVisible = snapshot.docs[0];
-        lastVisible = snapshot.docs[snapshot.docs.length - 1];
-        if (next) prevStack.push(firstVisible);
 
-        const user = auth.currentUser;
-    
-        for (let docSnap of snapshot.docs) {
-          const book = docSnap.data();
-          const bookId = docSnap.id;
-          let buttonHtml = "";
+      const user = auth.currentUser;
 
-          if (book.isAvailable) {
-            buttonHtml = `<button onclick="bookNow('${bookId}')">Book Now</button>`;
-          } else if (user) {
-            // check if this user booked it
-            const userBookingQuery = query(
-              collection(db, "bookings"),
-              where("userId", "==", user.uid),
-              where("bookId", "==", bookId),
-              where("status", "==", "booked")
-            );
-            const userBookingSnapshot = await getDocs(userBookingQuery);
+      for (let index = 0; index < snapshot.docs.length; index++) {
+        const docSnap = snapshot.docs[index];
+        const book = docSnap.data();
+        const bookId = docSnap.id;
+        let buttonHtml = "";
 
-            if (!userBookingSnapshot.empty) {
-              buttonHtml = `<button onclick="cancelBooking('${bookId}', '${userBookingSnapshot.docs[0].id}')">Cancel Booking</button>`;
-            } else {
-              buttonHtml = `<button disabled>Not Available</button>`;
-            }
+        if (book.isAvailable === true) {
+          buttonHtml = `<button onclick="bookNow('${bookId}')">Book Now</button>`;
+        } else if (user) {
+          const userBookingQuery = query(
+            collection(db, "bookings"),
+            where("userId", "==", user.uid),
+            where("bookId", "==", bookId),
+            where("status", "==", "booked")
+          );
+          const userBookingSnapshot = await getDocs(userBookingQuery);
+
+          if (!userBookingSnapshot.empty) {
+            buttonHtml = `<button onclick="cancelBooking('${bookId}', '${userBookingSnapshot.docs[0].id}')">Cancel Booking</button>`;
           } else {
             buttonHtml = `<button disabled>Not Available</button>`;
           }
-
-          const card = document.createElement("div");
-          card.className = "book-card";
-          card.innerHTML = `
-            <img src="${book.picture || 'default-book.png'}" class="book-img" alt="Book">
-            <h3>${book.name}</h3>
-            <p>👤 ${book.author}</p>
-            <p>Status: ${book.isAvailable ? "✅ Available" : "❌ Taken"}</p>
-            ${buttonHtml}
-          `;
-          booksList.appendChild(card);
+        } else {
+          buttonHtml = `<button disabled>Not Available</button>`;
         }
-    
-        document.getElementById("prevBtn").disabled = prevStack.length <= 1;
-        document.getElementById("nextBtn").disabled = snapshot.docs.length < pageSize;
+
+        const card = document.createElement("div");
+        card.className = "book-card";
+        card.innerHTML = `
+          <img src="${book.picture || 'default-book.png'}" class="book-img" alt="Book">
+          <h3>${book.name}</h3>
+          <p>👤 ${book.author}</p>
+          <p>Status: ${book.isAvailable ? "✅ Available" : "❌ Taken"}</p>
+          ${buttonHtml}
+        `;
+        booksList.appendChild(card);
+
+        if (index === 0) firstVisible = docSnap;
+        if (index === snapshot.docs.length - 1) lastVisible = docSnap;
       }
+
+      // 🔥 Enable/disable buttons properly
+      document.getElementById("prevBtn").disabled = prevStack.length <= 0;
+      document.getElementById("nextBtn").disabled = snapshot.docs.length < pageSize;
     }
+
     
     // 🚀 Booking
     window.bookNow = async function(bookId) {
