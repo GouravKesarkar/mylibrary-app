@@ -51,7 +51,7 @@
     import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import {
       getFirestore, collection, doc, query, where, orderBy,
-      limit, startAfter, getDocs, addDoc, updateDoc, getDoc, serverTimestamp
+      limit, startAfter, startAt, getDocs, addDoc, updateDoc, getDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     
     const firebaseConfig = {
@@ -70,9 +70,9 @@
     let lastVisible = null;
     let firstVisible = null;
     let searchQuery = "";
-    let prevStack = [];        // 🔥 keep track of previous pages
-    const pageSize = 10;       // 🔥 how many books per page
-
+    let prevStack = [];        // track previous pages
+    const pageSize = 10;       // books per page
+    
     async function loadBooks(nextPage = true) {
       let q;
       if (searchQuery) {
@@ -85,29 +85,28 @@
       } else {
         q = query(collection(db, "books"), orderBy("name"), limit(pageSize));
       }
-
-      // 🔥 handle next/prev
+    
+      // handle pagination
       if (nextPage && lastVisible) {
         q = query(q, startAfter(lastVisible));
-        prevStack.push(lastVisible);   // push current page marker
       }
       if (!nextPage && prevStack.length > 0) {
-        const prevDoc = prevStack.pop();  // go back
+        const prevDoc = prevStack.pop();
         q = query(q, startAt(prevDoc));
       }
-
+    
       const snapshot = await getDocs(q);
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "";
-
+    
       const user = auth.currentUser;
-
+    
       for (let index = 0; index < snapshot.docs.length; index++) {
         const docSnap = snapshot.docs[index];
         const book = docSnap.data();
         const bookId = docSnap.id;
         let buttonHtml = "";
-
+    
         if (book.isAvailable === true) {
           buttonHtml = `<button onclick="bookNow('${bookId}')">Book Now</button>`;
         } else if (user) {
@@ -118,7 +117,7 @@
             where("status", "==", "booked")
           );
           const userBookingSnapshot = await getDocs(userBookingQuery);
-
+    
           if (!userBookingSnapshot.empty) {
             buttonHtml = `<button onclick="cancelBooking('${bookId}', '${userBookingSnapshot.docs[0].id}')">Cancel Booking</button>`;
           } else {
@@ -127,7 +126,7 @@
         } else {
           buttonHtml = `<button disabled>Not Available</button>`;
         }
-
+    
         const card = document.createElement("div");
         card.className = "book-card";
         card.innerHTML = `
@@ -138,18 +137,22 @@
           ${buttonHtml}
         `;
         booksList.appendChild(card);
-
+    
         if (index === 0) firstVisible = docSnap;
         if (index === snapshot.docs.length - 1) lastVisible = docSnap;
       }
-
-      // 🔥 Enable/disable buttons properly
-      document.getElementById("prevBtn").disabled = prevStack.length <= 0;
+    
+      // push current page marker AFTER loading to fix prev button clicks
+      if (snapshot.docs.length > 0 && nextPage) {
+        prevStack.push(snapshot.docs[0]);
+      }
+    
+      // Enable/disable pagination buttons
+      document.getElementById("prevBtn").disabled = prevStack.length <= 1;
       document.getElementById("nextBtn").disabled = snapshot.docs.length < pageSize;
     }
-
     
-    // 🚀 Booking
+    // Booking function
     window.bookNow = async function(bookId) {
       try {
         const user = auth.currentUser;
@@ -178,7 +181,7 @@
         }
     
         await addDoc(collection(db, "bookings"), {
-          bookId: bookId,
+          bookId,
           userId: user.uid,
           userEmail: user.email,
           bookedAt: serverTimestamp(),
@@ -196,8 +199,8 @@
         showToast("❌ Error booking book: " + err.message);
       }
     };
-
-    // 🚀 Cancel booking
+    
+    // Cancel booking
     window.cancelBooking = async function(bookId, bookingId) {
       try {
         const bookRef = doc(db, "books", bookId);
@@ -213,14 +216,24 @@
       }
     };
     
-    // 🚀 Start
+    // Search handler
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      searchQuery = document.getElementById("searchInput").value.trim();
+      prevStack = [];
+      lastVisible = null;
+      loadBooks(true);
+    });
+    
+    // Start
     loadBooks(true);
     
+    // Pagination buttons
     window.changePage = function(step) {
       if (step === 1) loadBooks(true);
       if (step === -1) loadBooks(false);
     };
-  </script>
+    </script>
+    
     
   <script>
     function showToast(message, duration = 5000) {
