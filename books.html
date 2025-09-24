@@ -85,28 +85,35 @@
       } else {
         q = query(collection(db, "books"), orderBy("name"), limit(pageSize));
       }
-    
-      // handle pagination
-      if (nextPage && lastVisible) {
-        q = query(q, startAfter(lastVisible));
+
+      if (nextPage) {
+        if (lastVisible) {
+          // push current page marker for prev button
+          prevStack.push(lastVisible);
+          q = query(q, startAfter(lastVisible));
+        }
+      } else {
+        if (prevStack.length > 0) {
+          const prevDoc = prevStack.pop();
+          q = query(q, startAt(prevDoc));
+        } else {
+          // already at first page
+          q = query(q, limit(pageSize));
+        }
       }
-      if (!nextPage && prevStack.length > 0) {
-        const prevDoc = prevStack.pop();
-        q = query(q, startAt(prevDoc));
-      }
-    
+
       const snapshot = await getDocs(q);
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "";
-    
+
       const user = auth.currentUser;
-    
+
       for (let index = 0; index < snapshot.docs.length; index++) {
         const docSnap = snapshot.docs[index];
         const book = docSnap.data();
         const bookId = docSnap.id;
         let buttonHtml = "";
-    
+
         if (book.isAvailable === true) {
           buttonHtml = `<button onclick="bookNow('${bookId}')">Book Now</button>`;
         } else if (user) {
@@ -117,7 +124,7 @@
             where("status", "==", "booked")
           );
           const userBookingSnapshot = await getDocs(userBookingQuery);
-    
+
           if (!userBookingSnapshot.empty) {
             buttonHtml = `<button onclick="cancelBooking('${bookId}', '${userBookingSnapshot.docs[0].id}')">Cancel Booking</button>`;
           } else {
@@ -126,7 +133,7 @@
         } else {
           buttonHtml = `<button disabled>Not Available</button>`;
         }
-    
+
         const card = document.createElement("div");
         card.className = "book-card";
         card.innerHTML = `
@@ -137,20 +144,16 @@
           ${buttonHtml}
         `;
         booksList.appendChild(card);
-    
+
         if (index === 0) firstVisible = docSnap;
         if (index === snapshot.docs.length - 1) lastVisible = docSnap;
       }
-    
-      // push current page marker AFTER loading to fix prev button clicks
-      if (snapshot.docs.length > 0 && nextPage) {
-        prevStack.push(snapshot.docs[0]);
-      }
-    
+
       // Enable/disable pagination buttons
-      document.getElementById("prevBtn").disabled = prevStack.length <= 1;
+      document.getElementById("prevBtn").disabled = prevStack.length === 0;
       document.getElementById("nextBtn").disabled = snapshot.docs.length < pageSize;
     }
+
     
     // Booking function
     window.bookNow = async function(bookId) {
