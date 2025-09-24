@@ -72,7 +72,7 @@
     let searchQuery = "";
     let prevStack = [];        // track previous pages
     const pageSize = 10;       // books per page
-    
+
     async function loadBooks(nextPage = true) {
       let q;
       if (searchQuery) {
@@ -88,17 +88,14 @@
 
       if (nextPage) {
         if (lastVisible) {
-          // push current page marker for prev button
-          prevStack.push(lastVisible);
+          // push current page's first and last for prev button
+          prevStack.push({ first: firstVisible, last: lastVisible });
           q = query(q, startAfter(lastVisible));
         }
       } else {
         if (prevStack.length > 0) {
-          const prevDoc = prevStack.pop();
-          q = query(q, startAt(prevDoc));
-        } else {
-          // already at first page
-          q = query(q, limit(pageSize));
+          const prevPage = prevStack.pop();
+          q = query(q, startAt(prevPage.first));
         }
       }
 
@@ -108,8 +105,11 @@
 
       const user = auth.currentUser;
 
-      for (let index = 0; index < snapshot.docs.length; index++) {
-        const docSnap = snapshot.docs[index];
+      // Reset firstVisible/lastVisible for this page
+      firstVisible = snapshot.docs[0] || null;
+      lastVisible = snapshot.docs[snapshot.docs.length - 1] || null;
+
+      for (let docSnap of snapshot.docs) {
         const book = docSnap.data();
         const bookId = docSnap.id;
         let buttonHtml = "";
@@ -144,15 +144,13 @@
           ${buttonHtml}
         `;
         booksList.appendChild(card);
-
-        if (index === 0) firstVisible = docSnap;
-        if (index === snapshot.docs.length - 1) lastVisible = docSnap;
       }
 
-      // Enable/disable pagination buttons
+      // Enable/disable buttons
       document.getElementById("prevBtn").disabled = prevStack.length === 0;
       document.getElementById("nextBtn").disabled = snapshot.docs.length < pageSize;
     }
+
 
     
     // Booking function
