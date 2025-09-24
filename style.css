@@ -226,8 +226,16 @@ header button {
 
 /* ✅ Pagination */
 #pagination {
-  text-align: center;
+  display: flex;
+  justify-content: center;   /* center all items */
+  align-items: center;
+  gap: 10px;                 /* space between them */
   margin: 20px;
+  margin-bottom: 100px;      /* keep above footer */
+}
+#pageNumbers {
+  display: flex;
+  gap: 6px;                  /* spacing between page numbers */
 }
 #pagination button {
   margin: 5px;
