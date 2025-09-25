@@ -23,6 +23,10 @@
     <p class="register-text">
       New user? <a href="register.html">Register here</a>
     </p>
+    <p class="forgot-text">
+      <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+    </p>
+
 
     <!-- 📲 Install App Button (hidden until eligible) -->
     <button id="installBtn" style="display:none; margin-top:10px;">
@@ -47,6 +51,8 @@
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { getFirestore, doc, getDoc } 
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { sendPasswordResetEmail } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
     // ✅ Your Firebase Config
     const firebaseConfig = {
@@ -127,6 +133,25 @@
         errorMsg.textContent = "❌ " + error.message;
       }
     });
+
+    // ✅ Forgot Password
+    document.getElementById("forgotPasswordLink").addEventListener("click", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value.trim();
+        const errorMsg = document.getElementById("error-msg");
+
+        if (!email) {
+          errorMsg.textContent = "⚠️ Please enter your email first.";
+          return;
+        }
+
+        try {
+          await sendPasswordResetEmail(auth, email);
+          errorMsg.textContent = "✅ Password reset email sent! Check your inbox.";
+        } catch (error) {
+          errorMsg.textContent = "❌ " + error.message;
+        }
+      });
 
   </script>
 
