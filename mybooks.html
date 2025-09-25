@@ -92,7 +92,7 @@
       const bookingsQuery = query(
         collection(db, "bookings"),
         where("userId", "==", user.uid),
-        where("status", "in", ["booked", "approved"]),
+        where("status", "in", ["booked", "approved","returned"]),
         orderBy("bookedAt", "desc")
       );
 
@@ -127,11 +127,11 @@
         const book = bookSnap.data();
 
         // Approved date
-        const approvedDate = booking.issuedAt?.toDate ? booking.issuedAt.toDate() : null;
+        const issuedAt = booking.issuedAt?.toDate ? booking.issuedAt.toDate() : null;
 
         // Days borrowed
-        const daysWithUser = approvedDate 
-          ? Math.floor((Date.now() - approvedDate.getTime()) / (1000 * 60 * 60 * 24)) 
+        const daysWithUser = issuedAt 
+          ? Math.floor((Date.now() - issuedAt.getTime()) / (1000 * 60 * 60 * 24)) 
           : 0;
 
         const isOverdue = daysWithUser > 15;
@@ -142,10 +142,18 @@
         tableHTML += `
           <tr>
             <td>${book.name}</td>
-            <td>${approvedDate ? approvedDate.toLocaleDateString() : "N/A"}</td>
+            <td>${issuedAt ? issuedAt.toLocaleDateString() : "N/A"}</td>
             <td>${daysWithUser} days ${isOverdue ? '<span class="overdue">⚠ Overdue</span>' : ''}</td>
             <td>${returnedDate ? returnedDate.toLocaleDateString() : "-"}</td>
-            <td>${booking.status}</td>
+            <td>${
+                  booking.status === "approved"
+                    ? "Issued"
+                    : booking.status === "booked"
+                    ? "Pending Approval"
+                    : "Returned"
+                }
+            </td>
+
           </tr>
         `;
       }
