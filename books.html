@@ -70,9 +70,9 @@
     let lastVisible = null;
     let firstVisible = null;
     let searchQuery = "";
-    let prevStack = [];        // track previous pages
-    const pageSize = 10;       // books per page
-
+    let prevStack = [];
+    const pageSize = 10;
+    
     async function loadBooks(nextPage = true) {
       let q;
       if (searchQuery) {
@@ -85,38 +85,48 @@
       } else {
         q = query(collection(db, "books"), orderBy("name"), limit(pageSize));
       }
-
-      if (nextPage) {
-        if (lastVisible) {
-          // push current page's first and last for prev button
-          prevStack.push({ first: firstVisible, last: lastVisible });
-          q = query(q, startAfter(lastVisible));
-        }
-      } else {
-        if (prevStack.length > 0) {
-          const prevPage = prevStack.pop();
-          q = query(q, startAt(prevPage.first));
-        }
+    
+      if (nextPage && lastVisible) {
+        prevStack.push({ first: firstVisible, last: lastVisible });
+        q = query(q, startAfter(lastVisible));
       }
-
+      if (!nextPage && prevStack.length > 0) {
+        const prevPage = prevStack.pop();
+        q = query(q, startAt(prevPage.first));
+      }
+    
       const snapshot = await getDocs(q);
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "";
-
-      const user = auth.currentUser;
-
-      // Reset firstVisible/lastVisible for this page
-      firstVisible = snapshot.docs[0] || null;
-      lastVisible = snapshot.docs[snapshot.docs.length - 1] || null;
-
-      for (let docSnap of snapshot.docs) {
+    
+      for (let index = 0; index < snapshot.docs.length; index++) {
+        const docSnap = snapshot.docs[index];
         const book = docSnap.data();
         const bookId = docSnap.id;
         let buttonHtml = "";
-
+    
+        const user = auth.currentUser;
+    
         if (book.isAvailable === true) {
-          buttonHtml = `<button onclick="bookNow('${bookId}')">Book Now</button>`;
+          // Check if user already has a booked or approved book
+          if (user) {
+            const userBookingQuery = query(
+              collection(db, "bookings"),
+              where("userId", "==", user.uid),
+              where("status", "in", ["booked", "approved"])
+            );
+            const userBookingSnapshot = await getDocs(userBookingQuery);
+    
+            if (!userBookingSnapshot.empty) {
+              buttonHtml = `<button disabled>Cannot Book (Already has a book)</button>`;
+            } else {
+              buttonHtml = `<button onclick="bookNow('${bookId}')">Book Now</button>`;
+            }
+          } else {
+            buttonHtml = `<button onclick="bookNow('${bookId}')">Book Now</button>`;
+          }
         } else if (user) {
+          // Check if this user booked this book
           const userBookingQuery = query(
             collection(db, "bookings"),
             where("userId", "==", user.uid),
@@ -124,7 +134,7 @@
             where("status", "==", "booked")
           );
           const userBookingSnapshot = await getDocs(userBookingQuery);
-
+    
           if (!userBookingSnapshot.empty) {
             buttonHtml = `<button onclick="cancelBooking('${bookId}', '${userBookingSnapshot.docs[0].id}')">Cancel Booking</button>`;
           } else {
@@ -133,7 +143,7 @@
         } else {
           buttonHtml = `<button disabled>Not Available</button>`;
         }
-
+    
         const card = document.createElement("div");
         card.className = "book-card";
         card.innerHTML = `
@@ -144,14 +154,14 @@
           ${buttonHtml}
         `;
         booksList.appendChild(card);
+    
+        if (index === 0) firstVisible = docSnap;
+        if (index === snapshot.docs.length - 1) lastVisible = docSnap;
       }
-
-      // Enable/disable buttons
+    
       document.getElementById("prevBtn").disabled = prevStack.length === 0;
       document.getElementById("nextBtn").disabled = snapshot.docs.length < pageSize;
     }
-
-
     
     // Booking function
     window.bookNow = async function(bookId) {
@@ -167,7 +177,7 @@
         const userBookingSnapshot = await getDocs(userBookingQuery);
     
         if (!userBookingSnapshot.empty) {
-          showToast("❌ You already have a book booked. Cancel or Return it before booking a new one.");
+          showToast("❌ You already have a book booked or issued. Return it before booking a new one.");
           return;
         }
     
@@ -233,7 +243,8 @@
       if (step === 1) loadBooks(true);
       if (step === -1) loadBooks(false);
     };
-    </script>
+ </script>
+    
     
     
   <script>
