@@ -57,7 +57,7 @@
     <button onclick="window.location.href='home.html'">⬅ Back</button>
   </header>
 
-  <div id="myBooksList">⏳ Loading...</div>
+  <div id="myBooksHist">⏳ Loading...</div>
 
   <footer>
     <p>📚 Meera’s Library of Stories </p>
@@ -96,10 +96,10 @@
       );
 
       const bookingsSnap = await getDocs(bookingsQuery);
-      const myBooksList = document.getElementById("myBooksList");
+      const myBooksHist = document.getElementById("myBooksHist");
 
       if (bookingsSnap.empty) {
-        myBooksList.innerHTML = "<p>You have no active books ❌</p>";
+        myBooksHist.innerHTML = "<p>You have no active books ❌</p>";
         return;
       }
 
@@ -148,7 +148,7 @@
       }
 
       tableHTML += "</tbody></table>";
-      myBooksList.innerHTML = tableHTML;
+      myBooksHist.innerHTML = tableHTML;
     }
 
     auth.onAuthStateChanged(user => {
