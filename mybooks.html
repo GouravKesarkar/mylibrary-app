@@ -126,18 +126,21 @@
         if (!bookSnap.exists()) continue;
         const book = bookSnap.data();
 
-        // Approved date
+        // Approved (Issued) date
         const issuedAt = booking.issuedAt?.toDate ? booking.issuedAt.toDate() : null;
-
-        // Days borrowed
-        const daysWithUser = issuedAt 
-          ? Math.floor((Date.now() - issuedAt.getTime()) / (1000 * 60 * 60 * 24)) 
-          : 0;
-
-        const isOverdue = daysWithUser > 15;
 
         // Returned date
         const returnedDate = booking.returnedAt?.toDate ? booking.returnedAt.toDate() : null;
+
+        // Days with user
+        let daysWithUser = 0;
+        if (issuedAt) {
+          const endDate = returnedDate || new Date(); // if not returned, use today
+          daysWithUser = Math.floor((endDate - issuedAt) / (1000 * 60 * 60 * 24));
+        }
+
+        const isOverdue = daysWithUser > 15;
+
 
         tableHTML += `
           <tr>
