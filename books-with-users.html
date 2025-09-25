@@ -24,18 +24,32 @@
       width: 100%;
       border-collapse: collapse;
       margin-top: 15px;
+      table-layout: fixed;      /* ✅ prevents overflow */
     }
+
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: left;
+      word-wrap: break-word;    /* ✅ wrap long words */
+      white-space: normal;      /* ✅ allow multi-line text */
     }
+
     th {
       background: #0077ff;
       color: white;
     }
+
     tr:nth-child(even) { background: #f9f9f9; }
     tr:hover { background: #f1f1f1; }
+
+    /* Optional: set specific widths like you did earlier */
+    td:first-child { width: 25%; }  /* Book Name */
+    td:nth-child(2) { width: 25%; } /* User */
+    td:nth-child(3) { width: 20%; } /* Issued On */
+    td:nth-child(4) { width: 20%; } /* Days With User */
+    td:nth-child(5) { width: 10%; } /* Action */
+
     button.return-btn {
       background: #28a745;
       color: white;
