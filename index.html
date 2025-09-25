@@ -23,6 +23,11 @@
     <p class="register-text">
       New user? <a href="register.html">Register here</a>
     </p>
+
+    <!-- 📲 Install App Button (hidden until eligible) -->
+    <button id="installBtn" style="display:none; margin-top:10px;">
+      📲 Install App
+    </button>
   </div>
   
   
@@ -132,6 +137,31 @@
         .then(() => console.log("✅ Service Worker registered"))
         .catch(err => console.log("❌ SW registration failed", err));
     }
+  </script>
+  <!-- ✅ Install PWA Button Logic -->
+  <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById("installBtn");
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = "block"; // show button
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log("User response:", outcome);
+      deferredPrompt = null;
+      installBtn.style.display = "none";
+    });
+
+    window.addEventListener("appinstalled", () => {
+      console.log("✅ PWA installed");
+      installBtn.style.display = "none";
+    });
   </script>
 </body>
 </html>
