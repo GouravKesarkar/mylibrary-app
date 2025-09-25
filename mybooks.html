@@ -40,10 +40,11 @@
     tr:nth-child(even) { background: #f9f9f9; }
     tr:hover { background: #f1f1f1; }
 
-    td:first-child { width: 35%; }  /* Book Name */
+    td:first-child { width: 30%; }  /* Book Name */
     td:nth-child(2) { width: 20%; } /* Approved Date */
-    td:nth-child(3) { width: 20%; } /* Days With User */
-    td:nth-child(4) { width: 25%; } /* Returned Date */
+    td:nth-child(3) { width: 10%; } /* Days With User */
+    td:nth-child(4) { width: 20%; } /* Returned Date */
+    td:nth-child(5) { width: 20%; } /* Status */
 
     .overdue {
       color: red;
@@ -111,6 +112,7 @@
               <th>Approved Date</th>
               <th>Days With User</th>
               <th>Returned Date</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -143,6 +145,7 @@
             <td>${approvedDate ? approvedDate.toLocaleDateString() : "N/A"}</td>
             <td>${daysWithUser} days ${isOverdue ? '<span class="overdue">⚠ Overdue</span>' : ''}</td>
             <td>${returnedDate ? returnedDate.toLocaleDateString() : "-"}</td>
+            <td>${booking.status}</td>
           </tr>
         `;
       }
