@@ -131,10 +131,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    import { getAuth } from "firebase/auth";
-
-    const auth = getAuth();
-    console.log(auth.currentUser); // should not be null
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDNO-47La5ZZIYSEiPf3ArI2GxuLyLHNKE",
@@ -147,6 +145,15 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("Logged in user:", user.uid);
+    } else {
+      console.log("No user is signed in");
+    }
+  });
 
     document.getElementById("addBookForm").addEventListener("submit", async (e) => {
       e.preventDefault();
