@@ -134,6 +134,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth();
 
     const pageSize = 10;
     let lastVisible = null;
