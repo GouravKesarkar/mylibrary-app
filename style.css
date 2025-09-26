@@ -278,6 +278,12 @@ header button {
   transition: background 0.3s;
 }
 
+/* Disabled state */
+.section-btn:disabled {
+  background-color: #cccccc;  /* greyed out */
+  color: #666666;
+  cursor: not-allowed;
+}
 .section-btn:hover {
   background: #005fcc;
 }
