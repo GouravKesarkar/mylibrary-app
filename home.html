@@ -17,9 +17,8 @@
     <p id="welcomeMsg"></p>
 
     <button id="libraryBtn" class="section-btn">📖 Library Books</button>
-    <button id="myBooksBtn" class="section-btn" style="display:none;">📚 Books with Me</button>
-    <button id="manageBtn" class="section-btn" style="display:none;">⚙️ Book Management</button>
-
+    <button id="myBooksBtn" class="section-btn" disabled>📚 Books with Me</button>
+    <button id="manageBtn" class="section-btn" disabled>⚙️ Book Management</button>
     <button id="logoutBtn" class="section-btn logout-btn">🚪 Logout</button>
   </div>
   
@@ -78,19 +77,21 @@
       // Fetch role from Firestore
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
-        const userData = userDoc.data();  // <-- contains your stored fields: name, role, etc.
-        const role = userDoc.data().role;
+        const userData = userDoc.data();
+        const role = userData.role;
         welcomeMsg.textContent = `👋 Hello, ${userData.name}`;
 
+        // Enable the correct button based on role
         if (role === "customer") {
-          myBooksBtn.style.display = "block";
+          myBooksBtn.disabled = false;      // enable button
         }
         if (role === "admin") {
-          manageBtn.style.display = "block";
+          manageBtn.disabled = false;       // enable button
         }
       } else {
         welcomeMsg.textContent = "⚠️ Role not found. Contact Admin.";
       }
+
     });
 
     // ✅ Navigation
