@@ -42,8 +42,8 @@
   <div id="toast"></div>
 
   <footer>
-    <p>📚 Meera’s Library of Stories </p>
-    <a href="https://wa.me/?text=📚%20Check%20out%20this%20Meera's%20Library%20of%20Stories.%20App!%20Install%20it%20here:%20https://mklibrary.netlify.app/" class="share-btn" target="_blank" rel="noopener">📤 Share via WhatsApp</a>
+    <p>📚 My Book Shelf | © 2025 GK | All rights reserved</p>
+    <a href="https://wa.me/?text=📚%20Check%20out%20this%20Book%20Sharing%20App%20in%20RoseIcon.%20App!%20Install%20it%20here:%20https://mklibrary.netlify.app/" class="share-btn" target="_blank" rel="noopener">📤 Share via WhatsApp</a>
   </footer>
 
   <script type="module">
@@ -167,7 +167,7 @@
         const userBookingSnapshot = await getDocs(userBookingQuery);
     
         if (!userBookingSnapshot.empty) {
-          showToast("❌ You already have a book booked. Cancel or Return it before booking a new one.");
+          showToast("❌ You already have a book booked. Cancel Booking from this page by selecting the book. Or Return it if already borrowed before booking a new one.");
           return;
         }
     
@@ -191,7 +191,7 @@
     
         await updateDoc(bookRef, { isAvailable: false });
     
-        showToast("✅ Book successfully reserved. Kindly collect.");
+        showToast("✅ Book successfully reserved. Kindly collect the book.");
         prevStack = [];
         lastVisible = null;
         loadBooks(true);
@@ -237,7 +237,7 @@
     
     
   <script>
-    function showToast(message, duration = 5000) {
+    function showToast(message, duration = 10000) {
       const toast = document.getElementById("toast");
       toast.textContent = message;
       toast.classList.remove("hide");
