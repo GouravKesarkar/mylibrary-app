@@ -1,7 +1,7 @@
 {
-    "name": "MyLibrary",
-    "short_name": "Library",
-    "description": "A simple library management PWA",
+    "name": "MyBookShelf",
+    "short_name": "MyBookShelf",
+    "description": "A simple BookShelf management PWA",
     "start_url": "index.html",
     "display": "standalone",
     "background_color": "#ffffff",
