@@ -1,6 +1,6 @@
 {
     "name": "MyBookShelf",
-    "short_name": "MyBookShelf",
+    "short_name": "Books",
     "description": "A simple BookShelf management PWA",
     "start_url": "index.html",
     "display": "standalone",
