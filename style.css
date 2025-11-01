@@ -443,3 +443,25 @@ footer p {
     font-size: 14px;
   }
 }
+
+#installBtn {
+  display: none; /* stays hidden until eligible */
+  background: linear-gradient(45deg, #007bff, #00c6ff);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+/* Hover effect for more attention */
+#installBtn:hover {
+  transform: scale(1.05);
+  background: linear-gradient(45deg, #0062ff, #00a8ff);
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.7);
+}
+
