@@ -1,23 +1,24 @@
-const CACHE_NAME = "mylibrary-cache-v1";
+const CACHE_NAME = "mylibrary-cache-v2";
 const ASSETS = [
-  "/",
-  "/index.html",
-  "/home.html",
-  "/books.html",
-  "/mybooks.html",
-  "/book-management.html",
-  "/approve-books.html",
-  "/books-with-user.html",
-  "/add-books.html",
-  "/register.html",
-  "/userrequest-approve.html",
-  "/style.css",
-  "/manifest.json",
-  "/icon/mylibrary-icon-192.png"
+  "index.html",
+  "home.html",
+  "books.html",
+  "mybooks.html",
+  "book-management.html",
+  "approve-books.html",
+  "books-with-user.html",
+  "add-books.html",
+  "register.html",
+  "userrequest-approve.html",
+  "style.css",
+  "manifest.json",
+  "icon/mylibrary-icon_192.png"
 ];
+
 
 // Install event - cache assets
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
@@ -30,13 +31,20 @@ self.addEventListener("activate", (event) => {
       Promise.all(keys.map((key) => key !== CACHE_NAME && caches.delete(key)))
     )
   );
+  clients.claim();
 });
 
-// Fetch event - serve from cache first
+// Fetch event - Network first, fallback to cache
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((response) => {
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, responseClone);
+        });
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
