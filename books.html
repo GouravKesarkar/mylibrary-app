@@ -104,6 +104,9 @@
       const booksList = document.getElementById("booksList");
       booksList.innerHTML = "";
 
+      // ✅ Scroll to top whenever page changes
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
       const user = auth.currentUser;
 
       // Reset firstVisible/lastVisible for this page
